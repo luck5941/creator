@@ -1,3 +1,23 @@
+/*
+ *  Copyright 2018-2019 Felix Garcia Carballeira, Alejandro Calderon Mateos, Diego Camarmas Alonso
+ *
+ *  This file is part of CREATOR.
+ *
+ *  CREATOR is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  CREATOR is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with CREATOR.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 /********************
  * Global variables *
  ********************/
@@ -55,7 +75,9 @@ var actionTypes = [
 
 
 
-/*Compilator*/
+/*
+ * Compilator
+ */
 
 /*Assembly code textarea*/
 var code_assembly = '';
@@ -93,8 +115,8 @@ var compileError = [
   { mess1: "This field is too small to encode in binary '", mess2: "" },
   { mess1: "Incorrect pseudoinstruction definition ", mess2: "" },
   { mess1: "Invalid directive: ", mess2: "" },
-  { mess1: "Invalid data: ", mess2: " The data must be a number" }, 
-  { mess1: 'The string of characters must start with "', mess2: "" }, 
+  { mess1: "Invalid data: ", mess2: " The data must be a number" },
+  { mess1: 'The string of characters must start with "', mess2: "" },
   { mess1: "Number '", mess2: "' is too big" },
   { mess1: "Number '", mess2: "' is empty" },
   { mess1: "The text segment should start with '", mess2: "'" },
@@ -109,7 +131,9 @@ let promise;
 
 
 
-/*Simulator*/
+/*
+ * Simulator
+ */
 
 /*Displayed notifications*/
 var notifications = [];
@@ -157,17 +181,20 @@ var stats = [
 ];
 
 
+//
+// Auxiliar functions
+//
 
-function load_arch_select(cfg){
-
-		var ret = {};
+function load_arch_select(cfg)
+{
+    var ret = {};
 
     var auxArchitecture = cfg;
     architecture = bigInt_deserialize(auxArchitecture);
 
     architecture_hash = [];
     for (var i = 0; i < architecture.components.length; i++){
-      architecture_hash.push({name: architecture.components[i].name, index: i}); 
+      architecture_hash.push({name: architecture.components[i].name, index: i});
     }
 
     backup_stack_address = architecture.memory_layout[4].value;
@@ -178,91 +205,87 @@ function load_arch_select(cfg){
     return ret;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*Places the pointer in the first position*/
-function first_token() 
+function first_token()
 {
   var index = tokenIndex;
 
-  while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r') || (assembly.charAt(index) == '#')) && (index < assembly.length)){
-    while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-      index++;
+  while ( (":\t\n \r#".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+  {
+    while ( ( (assembly.charAt(index) == ':') ||
+	      (assembly.charAt(index) == '\t') ||
+	      (assembly.charAt(index) == '\n') ||
+	      (assembly.charAt(index) == ' ') ||
+	      (assembly.charAt(index) == '\r')) &&
+	      (index < assembly.length) )
+	  {
+             index++;
+          }
+
+    if (assembly.charAt(index) == '#')
+    {
+      while ( (assembly.charAt(index) != '\n') &&
+	      (index < assembly.length))
+	    {
+               index++;
+            }
+
+      while ( ((assembly.charAt(index) == ':') ||
+	       (assembly.charAt(index) == '\t') ||
+	       (assembly.charAt(index) == '\n') ||
+	       (assembly.charAt(index) == ' ') ||
+	       (assembly.charAt(index) == '\r')) &&
+	       (index < assembly.length))
+	    {
+                index++;
+            }
     }
 
-    if(assembly.charAt(index) == '#'){
-      while((assembly.charAt(index) != '\n') && (index < assembly.length)){
-        index++;
-      }
-
-      while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-        index++;
-      }
-    }
   }
 
   tokenIndex = index;
 }
 
 /*Read token*/
-function get_token(){
+function get_token()
+{
   var index = tokenIndex;
 
-  if(index >= assembly.length){
+  if (index >= assembly.length) {
     return null;
   }
 
-  console.log(assembly.charAt(index));
-  console.log(index);
+  //console.log(assembly.charAt(index));
+  //console.log(index);
 
-  if(assembly.charAt(index) == "'"){
+  if (assembly.charAt(index) == "'")
+  {
     index++;
     while(assembly.charAt(index) != "'" && index < assembly.length){
-      console.log(assembly.charAt(index));
-      console.log(index);
+      //console.log(assembly.charAt(index));
+      //console.log(index);
       index++;
     }
     index++;
 
-    console.log(assembly.substring(tokenIndex, index));
-    console.log(index);
-    console.log(assembly.substring(tokenIndex, index));
+    //console.log(assembly.substring(tokenIndex, index));
+    //console.log(index);
+    //console.log(assembly.substring(tokenIndex, index));
     return assembly.substring(tokenIndex, index);
   }
 
-  if(assembly.charAt(index) == '"'){
+  if (assembly.charAt(index) == '"'){
     index++;
     while(assembly.charAt(index) != '"' && index < assembly.length){
-      console.log(assembly.charAt(index));
-      console.log(index);
+      //console.log(assembly.charAt(index));
+      //console.log(index);
       index++;
     }
     index++;
 
-    console.log(assembly.substring(tokenIndex, index));
-    console.log(index);
-    console.log(assembly.substring(tokenIndex, index));
+    //console.log(assembly.substring(tokenIndex, index));
+    //console.log(index);
+    //console.log(assembly.substring(tokenIndex, index));
     return assembly.substring(tokenIndex, index);
   }
 
@@ -272,12 +295,16 @@ function get_token(){
     index++;
   }
 
-  while((assembly.charAt(index) != ',') && (assembly.charAt(index) != '(') && (assembly.charAt(index) != ')') && (assembly.charAt(index) != '[') && (assembly.charAt(index) != ']') && (assembly.charAt(index) != '{') && (assembly.charAt(index) != '}') && (assembly.charAt(index) != ':') && (assembly.charAt(index) != '#') && (assembly.charAt(index) != '\t') && (assembly.charAt(index) != '\n') && (assembly.charAt(index) != ' ') && (assembly.charAt(index) != '\r') && (index < assembly.length)){
-    index++;
+  while ( (",()[]{}:#\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+  {
+           index++;
   }
 
   var res;
-  if((assembly.charAt(index) == ':') || (assembly.charAt(index) == ')') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '}')){
+  if ((assembly.charAt(index) == ':') || 
+      (assembly.charAt(index) == ')') || 
+      (assembly.charAt(index) == ']') || 
+      (assembly.charAt(index) == '}')) {
     res = assembly.substring(tokenIndex, index) + assembly.charAt(index);
   }
   else{
@@ -293,53 +320,64 @@ function next_token()
 {
   var index = tokenIndex;
 
-  console.log(assembly.charAt(index));
-  if(assembly.charAt(index) == "'"){
+  //console.log(assembly.charAt(index));
+  if (assembly.charAt(index) == "'")
+  {
     index++;
-    while(assembly.charAt(index) != "'" && index < assembly.length){
-      console.log(assembly.charAt(index));
+    while ((assembly.charAt(index) != "'") && (index < assembly.length))
+    {
+      //console.log(assembly.charAt(index));
+      index++;
+    }
+
+    index++;
+  }
+
+  if (assembly.charAt(index) == '"')
+  {
+    index++;
+    while(assembly.charAt(index) != '"' && index < assembly.length)
+    {
+      //console.log(assembly.charAt(index));
       index++;
     }
     index++;
   }
 
-  if(assembly.charAt(index) == '"'){
-    index++;
-    while(assembly.charAt(index) != '"' && index < assembly.length){
-      console.log(assembly.charAt(index));
-      index++;
-    }
+  if ((assembly.charAt(index) == '(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
+       index++;
+  }
+
+  while ( (",()[]{}:#\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+  {
     index++;
   }
 
-  if((assembly.charAt(index) == '(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
-    index++;
-  }
-
-  while((assembly.charAt(index) != ',') && (assembly.charAt(index) != '(') && (assembly.charAt(index) != ')') && (assembly.charAt(index) != '[') && (assembly.charAt(index) != ']') && (assembly.charAt(index) != '{') && (assembly.charAt(index) != '}') && (assembly.charAt(index) != ':') && (assembly.charAt(index) != '#') && (assembly.charAt(index) != '\t') && (assembly.charAt(index) != '\n') && (assembly.charAt(index) != ' ') && (assembly.charAt(index) != '\r') && (index < assembly.length)){
-    index++;
-  }
-
-  while(((assembly.charAt(index) == ',') || (assembly.charAt(index) == '(') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '{') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r') || (assembly.charAt(index) == '#')) && (index < assembly.length)){
-
-    while(((assembly.charAt(index) ==',') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-      index++;
-    }
-
-    if((assembly.charAt(index) =='(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
-      break;
-    }
-
-    if(assembly.charAt(index) == '#'){
-      while((assembly.charAt(index) != '\n') && (index < assembly.length)){
-        index++;
+  while ( (",()[]{}:#\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+  {
+      while ( (",)]}:\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+      {
+         index++;
       }
 
-      while(((assembly.charAt(index) == '(') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '{') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-        index++;
+      if ((assembly.charAt(index) =='(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{'))
+      {
+         break;
       }
-    }
+
+      if (assembly.charAt(index) == '#')
+      {
+         while ((assembly.charAt(index) != '\n') && (index < assembly.length))
+         {
+            index++;
+         }
+         while ( ("()[]{}:\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+         {
+            index++;
+         }
+      }
   }
+
   tokenIndex = index;
 }
 
@@ -553,7 +591,7 @@ function assembly_compiler(assembly_code)
         ret.tokenIndex = tokenIndex;
         tokenIndex = 0;
         return ret ;
-      } 
+      }
     }
   }
 
@@ -990,7 +1028,7 @@ function assembly_compiler(assembly_code)
           break;
         }
       }
-    } 
+    }
   }
 
   /*Save tags*/
@@ -1012,20 +1050,20 @@ function assembly_compiler(assembly_code)
           break;
         }
       }
-    } 
+    }
   }
 
   //app._data.instructions = instructions;
 
   /*Initialize stack*/
   memory[memory_hash[2]].push({Address: stack_address, Binary: [], Value: null, DefValue: null, reset: false, unallocated: false});
-  
+
   for(var i = 0; i<4; i++){
     (memory[memory_hash[2]][memory[memory_hash[2]].length-1].Binary).push({Addr: stack_address + i, DefBin: "00", Bin: "00", Tag: null},);
   }
 
   tokenIndex = 0;
-  
+
   reset();
 
   address = architecture.memory_layout[0].value;
@@ -1090,7 +1128,7 @@ function data_segment_compiler(){
 	        ret.token = token.substring(0,token.length-1);
 	        ret.tokenIndex = tokenIndex;
           return ret;
-        } 
+        }
       }
 
       label = token.substring(0,token.length-1);
@@ -1207,7 +1245,7 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
+
               console.log(auxTokenString)
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, parseInt(auxTokenString, 16)) == -1){
@@ -1319,7 +1357,7 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
+
               console.log(auxTokenString)
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, parseInt(auxTokenString, 16)) == -1){
@@ -1429,7 +1467,7 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
+
               console.log(auxTokenString);
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, (parseInt(auxTokenString, 16)) >> 0) == -1){
@@ -1540,7 +1578,7 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
+
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, parseInt(auxTokenString, 16)) == -1){
                 return -1;
               }
@@ -1649,7 +1687,7 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
+
               console.log(auxTokenString);
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, token) == -1){
@@ -1691,7 +1729,7 @@ function data_segment_compiler(){
                 ret.status = "error" ;
 				        ret.errorcode = 23;
 				        ret.token = "";
-				        ret.tokenIndex = tokenIndex;     
+				        ret.tokenIndex = tokenIndex;
 
 				        return ret;
               }
@@ -1701,7 +1739,7 @@ function data_segment_compiler(){
                 ret.status = "error" ;
 				        ret.errorcode = 24;
 				        ret.token = token;
-				        ret.tokenIndex = tokenIndex;     
+				        ret.tokenIndex = tokenIndex;
 
 				        return ret;
               }
@@ -1762,7 +1800,7 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
+
               console.log(auxTokenString);
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, token) == -1){
@@ -1852,7 +1890,7 @@ function data_segment_compiler(){
                 string = token.substring(1, token.length-1);
                 final = true;
               }
-              
+
               while(final == false){
                 next_token();
                 token = get_token();
@@ -1933,7 +1971,7 @@ function data_segment_compiler(){
                   }
 
                   data_address++;
-                
+
                 }
                 else{
                   if(i == 0){
@@ -1986,7 +2024,7 @@ function data_segment_compiler(){
             break;
           case "ascii_null_end":
             console.log("ascii_null_end");
-            
+
             var isAscii = true;
             var nextToken = 1;
 
@@ -2033,7 +2071,7 @@ function data_segment_compiler(){
 
               var string = "";
               var final = false;
-              
+
               re = new RegExp('"$');
               console.log(re);
               console.log(token);
@@ -2044,7 +2082,7 @@ function data_segment_compiler(){
                 string = token.substring(1, token.length-1);
                 final = true;
               }
-              
+
               while(final == false){
                 next_token();
                 token = get_token();
@@ -2341,7 +2379,7 @@ function data_segment_compiler(){
         //app._data.memory[memory_hash[0]] = memory[memory_hash[0]];
         return;
       }
-    
+
     }
   }
   //app._data.memory[memory_hash[0]] = memory[memory_hash[0]];
@@ -2435,8 +2473,8 @@ function code_segment_compiler(){
 
     for(var i = 0; i < architecture.directives.length; i++){
       if(token == architecture.directives[i].name && architecture.directives[i].action == "global_symbol"){
-        next_token(); // .globl *main* 
-        next_token(); 
+        next_token(); // .globl *main*
+        next_token();
         token = get_token();
       }
       else if(token == architecture.directives[i].name){
@@ -2492,7 +2530,7 @@ function code_segment_compiler(){
 					        ret.token = token.substring(0,token.length-1);
 					        ret.tokenIndex = tokenIndex;
 	                return ret;
-        } 
+        }
       }
 
       label = token.substring(0,token.length-1);
@@ -2524,7 +2562,7 @@ function code_segment_compiler(){
       console.log(token)
       var stopFor = false;
     }
-    
+
 
     for(var i = 0; i < architecture.instructions.length && stopFor == false && end == false; i++){
       if(architecture.instructions[i].name != token){
@@ -2569,7 +2607,7 @@ function code_segment_compiler(){
             }*/
             instruction = instruction + " " + token;
             userInstruction = userInstruction + " " + token;
-          }  
+          }
 
           /*if(new_ins == 1){
             break;
@@ -2648,7 +2686,7 @@ function code_segment_compiler(){
 				ret.status = "error" ;
         ret.errorcode = 2;
         ret.token = token;
-        ret.tokenIndex = tokenIndex;     
+        ret.tokenIndex = tokenIndex;
 
         return ret;
       }
@@ -2695,7 +2733,7 @@ function code_segment_compiler(){
         ret.status = "error" ;
         ret.errorcode = 25;
         ret.token = "";
-        ret.tokenIndex = tokenIndex;     
+        ret.tokenIndex = tokenIndex;
 
         return ret;
       }
@@ -2815,7 +2853,7 @@ function pseudoinstruction_compiler(instruction, label, line){
           var aux = "";
 
           for(var b = 0; b < architecture.components[3].elements.length; b++){
-            console.log(architecture.components[3].elements[b].name); 
+            console.log(architecture.components[3].elements[b].name);
             if(architecture.components[3].elements[b].name == args[0]){
               aux = architecture.components[3].elements[b].simple_reg[args[1]];
               console.log(aux);
@@ -2879,7 +2917,7 @@ function pseudoinstruction_compiler(instruction, label, line){
           }
 
           definition = definition.replace("Field." + match[1] + ".(" + match[2]+ ")." + match[3], value);
-          
+
           re = /Field.(\d).\((.*?)\).(.*?)[;\s]/;
         }
 
@@ -3015,7 +3053,7 @@ function field(field, action, type){
   console.log(field);
   console.log(action);
   console.log(type);
-  
+
   if(action == "SIZE"){
     console.log("SIZE");
 
@@ -3199,7 +3237,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             return;
           }
         }
-        
+
 
 
 
@@ -3222,7 +3260,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             }
             console.log(instruction)
             resultPseudo = pseudoinstruction_compiler(instruction, label, tokenIndex);
-          
+
             console.log(resultPseudo)
 
             if(resultPseudo == 0){
@@ -3234,7 +3272,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
               ret.status = "error" ;
 			        ret.errorcode = 3;
 			        ret.token = auxSignature;
-			        ret.tokenIndex = tokenIndex;     
+			        ret.tokenIndex = tokenIndex;
 
 			        return ret;
             }
@@ -3259,7 +3297,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
       	ret.status = "error" ;
         ret.errorcode = 3;
         ret.token = auxSignature;
-        ret.tokenIndex = tokenIndex;     
+        ret.tokenIndex = tokenIndex;
 
         return ret;
       }
@@ -3274,7 +3312,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
       else{
         return -2;
       }
-      
+
       console.log(instructionParts);
 
       //PRUEBA
@@ -3321,7 +3359,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       	ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3334,7 +3372,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       console.log(binary.length - (architecture.instructions[i].fields[a].startbit + 1))
 
                       binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + (reg.toString(2)).padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
-                      
+
                       console.log(binary);
 
                       //re = RegExp("[fF][0-9]+");
@@ -3351,7 +3389,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3365,7 +3403,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3400,7 +3438,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3416,7 +3454,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3453,7 +3491,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3467,7 +3505,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3504,7 +3542,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3518,7 +3556,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3541,7 +3579,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-            
+
                 var inm;
 
                 if(token.match(/^0x/)){
@@ -3555,7 +3593,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3564,7 +3602,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3575,7 +3613,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3592,7 +3630,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3601,7 +3639,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3611,7 +3649,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3651,7 +3689,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3660,7 +3698,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3670,7 +3708,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3683,14 +3721,14 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 12;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
 
                   binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + inm.padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
                 }
-                
+
                 //re = RegExp("[fF][0-9]+");
                 re = RegExp("Field[0-9]+");
                 instruction = instruction.replace(re, token);
@@ -3715,7 +3753,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 8;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3724,7 +3762,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 9;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3754,7 +3792,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-            
+
                 var inm;
 
                 if(token.match(/^0x/)){
@@ -3768,7 +3806,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3777,7 +3815,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3788,7 +3826,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 							        ret.errorcode = 6;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                   }
@@ -3805,7 +3843,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3814,7 +3852,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3824,7 +3862,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3851,7 +3889,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3860,7 +3898,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3870,7 +3908,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3882,14 +3920,14 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 12;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
 
                   binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + inm.padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
                 }
-                
+
                 //re = RegExp("[fF][0-9]+");
                 re = RegExp("Field[0-9]+");
                 console.log(instruction);
@@ -3909,7 +3947,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-            
+
                 var inm;
 
                 if(token.match(/^0x/)){
@@ -3923,7 +3961,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3932,7 +3970,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3943,7 +3981,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3960,7 +3998,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3969,7 +4007,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3979,7 +4017,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -4006,7 +4044,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -4015,7 +4053,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -4025,7 +4063,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -4037,14 +4075,14 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 12;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
 
                   binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + inm.padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
                 }
-                
+
                 //re = RegExp("[fF][0-9]+");
                 re = RegExp("Field[0-9]+");
                 console.log(instruction);
@@ -4064,11 +4102,11 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
               console.log(architecture.instructions[i].fields[a].name);
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-                
+
                 console.log((architecture.instructions[i].co).padStart(fieldsLength, "0"));
 
                 binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + (architecture.instructions[i].co).padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit), binary.length);
-                
+
                 console.log(binary);
 
                 //re = RegExp("[fF][0-9]+");
@@ -4291,14 +4329,14 @@ function bin2hex(s) {
     part = s.substr(i+1-4, 4);
     accum = 0;
     for (k = 0; k < 4; k += 1){
-      if (part[k] !== '0' && part[k] !== '1'){     
+      if (part[k] !== '0' && part[k] !== '1'){
           return { valid: false };
       }
       accum = accum * 2 + parseInt(part[k], 10);
     }
     if (accum >= 10){
       ret = String.fromCharCode(accum - 10 + 'A'.charCodeAt(0)) + ret;
-    } 
+    }
     else {
       ret = String(accum) + ret;
     }
@@ -4325,7 +4363,7 @@ function binaryStringToInt( b ) {
 /*Reset execution*/
 function reset(){
   executionIndex = 0;
-  
+
   /*Reset stats*/
   totalStats=0;
   for (var i = 0; i < stats.length; i++){
@@ -4440,7 +4478,8 @@ function bigInt_deserialize(object){
     }
   }
   return auxObject;
-}/*
+}
+/*
  *  Copyright 2018-2019 Felix Garcia Carballeira, Alejandro Calderon Mateos, Diego Camarmas Alonso
  *
  *  This file is part of CREATOR.
@@ -4461,12 +4500,9 @@ function bigInt_deserialize(object){
  */
 
 
-
-
-
-
-
-/*Simulator*/
+/*
+ * Simulator
+ */
 
 /*Displayed notifications*/
 var notifications = [];
@@ -4804,6 +4840,8 @@ try{
       },
       /*Run button*/
       runExecution: false,
+      /*Reset button*/
+      resetBut: false,
       /*Instrutions table fields*/
       archInstructions: ['Break', 'Address', 'Label', 'User Instructions', 'Loaded Instructions'],
       /*Instructions memory*/
@@ -4860,11 +4898,56 @@ try{
     /*Mounted vue instance*/
     mounted(){
       this.backupCopyModal();
+      this.verifyNavigator();
     },
 
 
     /*Vue methods*/
     methods:{
+      /*Generic*/
+      verifyNavigator(){
+        if (navigator.userAgent.indexOf("OPR") > -1) {
+          this.$refs.navigator.show();
+        } 
+        else if (navigator.userAgent.indexOf("MIE") > -1) {
+          this.$refs.navigator.show();
+        }
+        else if (navigator.userAgent.indexOf("Edge") > -1) {
+          this.$refs.navigator.show();
+        } 
+        else if(navigator.userAgent.indexOf("Chrome") > -1) {
+          return;
+        } 
+        else if (navigator.userAgent.indexOf("Safari") > -1) {
+          return;
+        } 
+        else if (navigator.userAgent.indexOf("Firefox") > -1) {
+          return
+        } 
+        else{
+          this.$refs.navigator.show();
+        }
+      },
+
+      show_notification ( msg, type )
+      {
+          $(".loading").hide();
+          app._data.alertMessage = msg ;
+          app._data.type = type ;
+          app.$bvToast.toast(app._data.alertMessage, {
+            variant: app._data.type,
+            solid: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 1500,
+          });
+
+          var date = new Date();
+          notifications.push({ mess: app._data.alertMessage, 
+                               color: app._data.type, 
+                               time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), 
+                               date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear() }); 
+      },
+
       /*Architecture editor*/
 
       /*Load the available architectures and check if exists backup*/
@@ -4895,6 +4978,7 @@ try{
           }
         });
       },
+
       /*Change the background of selected achitecture card*/
       change_background(name, type){
         if(type == 1){
@@ -4913,6 +4997,7 @@ try{
           }
         }
       },
+
       /*Show backup modal*/
       backupCopyModal(){
         if (typeof(Storage) !== "undefined"){
@@ -4922,6 +5007,7 @@ try{
           }
         }
       },
+
       /*Load backup*/
       load_copy(){
         this.architecture_name = localStorage.getItem("arch_name");
@@ -4956,17 +5042,9 @@ try{
 
         this.$refs.copyRef.hide();
 
-        app._data.alertMessage = 'The backup has been loaded correctly';
-        app._data.type = 'success';
-        app.$bvToast.toast(app._data.alertMessage, {
-          variant: app._data.type,
-          solid: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 1500,
-        });
-        var date = new Date();
-        notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+        show_notification('The backup has been loaded correctly', 'success') ;
       },
+
       /*Delete backup*/
       remove_copy(){
         localStorage.removeItem("architecture_copy");
@@ -4974,6 +5052,7 @@ try{
         localStorage.removeItem("date_copy");
         this.$refs.copyRef.hide();
       },
+
       /*Load the selected architecture*/
       load_arch_select(e){
         $(".loading").show();
@@ -5008,17 +5087,7 @@ try{
             $("#view_components").show();
             $(".loading").hide();
 
-            app._data.alertMessage = 'The selected architecture has been loaded correctly';
-            app._data.type = 'success';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            });
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-            
+            show_notification('The selected architecture has been loaded correctly', 'success') ;
             return;
           }
         }
@@ -5049,49 +5118,22 @@ try{
           $("#load_arch").hide();
           $("#load_menu_arch").hide();
           $("#view_components").show();
-          $(".loading").hide();
 
-          app._data.alertMessage = 'The selected architecture has been loaded correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The selected architecture has been loaded correctly', 'success') ;
         })
 
         .fail(function() {
-          $(".loading").hide();
-          app._data.alertMessage = 'The selected architecture is not currently available';
-          app._data.type = 'info';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The selected architecture is not currently available', 'info') ;
         });
       },
+
       /*Read the JSON of new architecture*/
       read_arch(e){
         $(".loading").show();
 
         e.preventDefault();
-        if(!this.name_arch || !this.load_arch){
-          $(".loading").hide();
-          app._data.alertMessage = 'Please complete all fields';
-          app._data.type = 'danger';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
+        if(!this.name_arch || !this.load_arch) {
+          show_notification('Please complete all fields', 'danger') ;
           return;
         }
 
@@ -5122,16 +5164,7 @@ try{
             localStorage.setItem("load_architectures_available", auxArch);
           }
 
-          app._data.alertMessage = 'The selected architecture has been loaded correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()});
+          show_notification('The selected architecture has been loaded correctly', 'success') ;
           
           app._data.name_arch = '';
           app._data.description_arch = '';
@@ -5193,16 +5226,7 @@ try{
         auxArch = JSON.stringify(load_architectures_available, null, 2);
         localStorage.setItem("load_architectures_available", auxArch);
 
-        app._data.alertMessage = 'Architecture deleted successfully';
-        app._data.type = 'success';
-        app.$bvToast.toast(app._data.alertMessage, {
-          variant: app._data.type,
-          solid: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 1500,
-        });
-        var date = new Date();
-        notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+        show_notification('Architecture deleted successfully', 'success') ;
       },
       /*Save the current architecture in a JSON file*/
       arch_save(){
@@ -5233,16 +5257,7 @@ try{
 
         downloadLink.click();
 
-        app._data.alertMessage = 'Save architecture';
-        app._data.type = 'success';
-        app.$bvToast.toast(app._data.alertMessage, {
-          variant: app._data.type,
-          solid: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 1500,
-        });
-        var date = new Date();
-        notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+        show_notification('Save architecture', 'success') ;
       },
       /*Change the execution mode of architecture editor*/
       change_mode(){
@@ -5271,18 +5286,7 @@ try{
             architecture.memory_layout = auxArchitecture.memory_layout;
             app._data.architecture = architecture;
 
-            $(".loading").hide();
-            app._data.alertMessage = 'The memory layout has been reset correctly';
-            app._data.type = 'success';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            })
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-            
+            show_notification('The memory layout has been reset correctly', 'success') ;
             return;
           }
         }
@@ -5294,17 +5298,7 @@ try{
           architecture.memory_layout = auxArchitecture2.memory_layout;
           app._data.architecture = architecture;
 
-          $(".loading").hide();
-          app._data.alertMessage = 'The memory layout has been reset correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          })
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The memory layout has been reset correctly', 'success') ;
         });
       },
       /*Check de memory layout changes*/
@@ -5315,64 +5309,28 @@ try{
           if(this.memory_layout[i] != "" && this.memory_layout[i] != null){
             if(!isNaN(parseInt(this.memory_layout[i]))){
               auxMemoryLayout[i].value = parseInt(this.memory_layout[i]);
-              if(auxMemoryLayout[i].value < 0){
-                app._data.alertMessage = 'The value can not be negative';
-                app._data.type = 'danger';
-                app.$bvToast.toast(app._data.alertMessage, {
-                  variant: app._data.type,
-                  solid: true,
-                  toaster: "b-toaster-top-center",
-                  autoHideDelay: 1500,
-                });
-                var date = new Date();
-                notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+              if (auxMemoryLayout[i].value < 0) {
+                show_notification('The value can not be negative', 'danger') ;
                 return;
               }
             }
             else{
-              app._data.alertMessage = 'The value must be a number';
-              app._data.type = 'danger';
-              app.$bvToast.toast(app._data.alertMessage, {
-                variant: app._data.type,
-                solid: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 1500,
-              });
-              var date = new Date();
-              notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-              return;
+                show_notification('The value must be a number', 'danger') ;
+                return;
             }
           }
         }
 
         for(var i = 0; i < 6; i++){
-          /*if(i%2 == 0 && auxMemoryLayout[i].value % 4 != 0){
-            app._data.alertMessage = 'The memory must be aligned';
-            app._data.type = 'danger';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            });
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()});  
-            return;
+          /*if (i%2 == 0 && auxMemoryLayout[i].value % 4 != 0){
+                show_notification('The memory must be aligned', 'danger') ;
+                return;
           }*/
 
           for(var j = i; j < 6; j++){
-            if(auxMemoryLayout[i].value > auxMemoryLayout[j].value){
-              app._data.alertMessage = 'The segment can not be overlap';
-              app._data.type ='danger';
-              app.$bvToast.toast(app._data.alertMessage, {
-                variant: app._data.type,
-                solid: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 1500,
-              });
-              var date = new Date();
-              notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-              return;
+            if (auxMemoryLayout[i].value > auxMemoryLayout[j].value){
+                show_notification('The segment can not be overlap', 'danger') ;
+                return;
             }
           }
         }
@@ -5429,18 +5387,7 @@ try{
               app._data.architecture_hash = architecture_hash;
             }
 
-            $(".loading").hide();
-            app._data.alertMessage = 'The registers has been reset correctly';
-            app._data.type = 'success';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            });
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-            
+            show_notification('The registers has been reset correctly', 'success') ;
             return;
           }
         }
@@ -5459,34 +5406,17 @@ try{
             app._data.architecture_hash = architecture_hash;
           }
 
-          $(".loading").hide();
-          app._data.alertMessage = 'The registers has been reset correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The registers has been reset correctly', 'success') ;
         });
       },
       /*Verify all field of new component*/
       newComponentVerify(evt){
         evt.preventDefault();
         if (!this.formArchitecture.name || !this.formArchitecture.type){
-          app._data.alertMessage = 'Please complete all fields';
-          app._data.type = 'danger';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
+            show_notification('Please complete all fields', 'danger') ;
         } 
         else{
-          this.newComponent();
+            this.newComponent();
         }
       },
       /*Create a new component*/
@@ -9047,6 +8977,13 @@ try{
             $("#playExecution").show();
             return;
           }
+          else if(this.resetBut == true){
+            app._data.resetBut = false;
+
+            $("#stopExecution").hide();
+            $("#playExecution").show();
+            return;
+          }
           else{
             this.executeInstruction();
             iter1 = 0;
@@ -10406,6 +10343,7 @@ try{
             break;
         }
       },
+
       /*Exception Notification*/
       exception(error){
         app._data.alertMessage = "There is been an exception. Error description: '" + error;
@@ -10442,6 +10380,7 @@ try{
           reset() ;
 
           // reset UI
+          app._data.resetBut = true;
           for (var i = 0; i < instructions.length; i++) {
             instructions[i]._rowVariant = '';
           }
@@ -10462,6 +10401,7 @@ try{
           $(".loading").hide();
         }, 25);
       },
+
       /*Enter a breakpoint*/
       breakPoint(record, index){
         for (var i = 0; i < instructions.length; i++) {
@@ -10480,6 +10420,7 @@ try{
           app._data.instructions[index].Break = null;
         }
       },
+
       /*Console mutex*/
       consoleEnter(){
         if(this.keyboard != ""){
@@ -10491,6 +10432,7 @@ try{
         this.keyboard = "";
         this.display = "";
       },
+
       /*Convert hexadecimal number to floating point number*/
       hex2float ( hexvalue ){
         /*var sign     = (hexvalue & 0x80000000) ? -1 : 1;
@@ -10521,6 +10463,7 @@ try{
         new Uint8Array( buffer ).set( value_bit.match(/.{8}/g).map( binaryStringToInt ) );
         return new DataView( buffer ).getFloat32(0, false);
       },
+
       /*Convert hexadecimal number to double floating point number*/
       hex2double ( hexvalue ){
         var value = hexvalue.split('x');
@@ -10842,6 +10785,8 @@ try{
     } ;
     textarea_assembly_editor.addKeyMap(map);*/
   }
+
+
 
 
 
