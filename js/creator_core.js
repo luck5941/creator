@@ -1,3 +1,23 @@
+/*
+ *  Copyright 2018-2019 Felix Garcia Carballeira, Alejandro Calderon Mateos, Diego Camarmas Alonso
+ *
+ *  This file is part of CREATOR.
+ *
+ *  CREATOR is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  CREATOR is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with CREATOR.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 /********************
  * Global variables *
  ********************/
@@ -55,7 +75,9 @@ var actionTypes = [
 
 
 
-/*Compilator*/
+/*
+ * Compilator
+ */
 
 /*Assembly code textarea*/
 var code_assembly = '';
@@ -109,7 +131,9 @@ let promise;
 
 
 
-/*Simulator*/
+/* 
+ * Simulator
+ */
 
 /*Displayed notifications*/
 var notifications = [];
@@ -157,10 +181,13 @@ var stats = [
 ];
 
 
+//
+// Auxiliar functions
+//
 
-function load_arch_select(cfg){
-
-		var ret = {};
+function load_arch_select(cfg)
+{
+    var ret = {};
 
     var auxArchitecture = cfg;
     architecture = bigInt_deserialize(auxArchitecture);
@@ -177,29 +204,6 @@ function load_arch_select(cfg){
     ret.type = "success";
     return ret;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*Places the pointer in the first position*/
 function first_token() 

@@ -19,12 +19,9 @@
  */
 
 
-
-
-
-
-
-/*Simulator*/
+/*
+ * Simulator
+ */
 
 /*Displayed notifications*/
 var notifications = [];
@@ -362,6 +359,8 @@ try{
       },
       /*Run button*/
       runExecution: false,
+      /*Reset button*/
+      resetBut: false,
       /*Instrutions table fields*/
       archInstructions: ['Break', 'Address', 'Label', 'User Instructions', 'Loaded Instructions'],
       /*Instructions memory*/
@@ -418,11 +417,56 @@ try{
     /*Mounted vue instance*/
     mounted(){
       this.backupCopyModal();
+      this.verifyNavigator();
     },
 
 
     /*Vue methods*/
     methods:{
+      /*Generic*/
+      verifyNavigator(){
+        if (navigator.userAgent.indexOf("OPR") > -1) {
+          this.$refs.navigator.show();
+        } 
+        else if (navigator.userAgent.indexOf("MIE") > -1) {
+          this.$refs.navigator.show();
+        }
+        else if (navigator.userAgent.indexOf("Edge") > -1) {
+          this.$refs.navigator.show();
+        } 
+        else if(navigator.userAgent.indexOf("Chrome") > -1) {
+          return;
+        } 
+        else if (navigator.userAgent.indexOf("Safari") > -1) {
+          return;
+        } 
+        else if (navigator.userAgent.indexOf("Firefox") > -1) {
+          return
+        } 
+        else{
+          this.$refs.navigator.show();
+        }
+      },
+
+      show_notification ( msg, type )
+      {
+          $(".loading").hide();
+          app._data.alertMessage = msg ;
+          app._data.type = type ;
+          app.$bvToast.toast(app._data.alertMessage, {
+            variant: app._data.type,
+            solid: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 1500,
+          });
+
+          var date = new Date();
+          notifications.push({ mess: app._data.alertMessage, 
+                               color: app._data.type, 
+                               time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), 
+                               date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear() }); 
+      },
+
       /*Architecture editor*/
 
       /*Load the available architectures and check if exists backup*/
@@ -453,6 +497,7 @@ try{
           }
         });
       },
+
       /*Change the background of selected achitecture card*/
       change_background(name, type){
         if(type == 1){
@@ -471,6 +516,7 @@ try{
           }
         }
       },
+
       /*Show backup modal*/
       backupCopyModal(){
         if (typeof(Storage) !== "undefined"){
@@ -480,6 +526,7 @@ try{
           }
         }
       },
+
       /*Load backup*/
       load_copy(){
         this.architecture_name = localStorage.getItem("arch_name");
@@ -514,17 +561,9 @@ try{
 
         this.$refs.copyRef.hide();
 
-        app._data.alertMessage = 'The backup has been loaded correctly';
-        app._data.type = 'success';
-        app.$bvToast.toast(app._data.alertMessage, {
-          variant: app._data.type,
-          solid: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 1500,
-        });
-        var date = new Date();
-        notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+        show_notification('The backup has been loaded correctly', 'success') ;
       },
+
       /*Delete backup*/
       remove_copy(){
         localStorage.removeItem("architecture_copy");
@@ -532,6 +571,7 @@ try{
         localStorage.removeItem("date_copy");
         this.$refs.copyRef.hide();
       },
+
       /*Load the selected architecture*/
       load_arch_select(e){
         $(".loading").show();
@@ -566,17 +606,7 @@ try{
             $("#view_components").show();
             $(".loading").hide();
 
-            app._data.alertMessage = 'The selected architecture has been loaded correctly';
-            app._data.type = 'success';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            });
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-            
+            show_notification('The selected architecture has been loaded correctly', 'success') ;
             return;
           }
         }
@@ -607,49 +637,22 @@ try{
           $("#load_arch").hide();
           $("#load_menu_arch").hide();
           $("#view_components").show();
-          $(".loading").hide();
 
-          app._data.alertMessage = 'The selected architecture has been loaded correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The selected architecture has been loaded correctly', 'success') ;
         })
 
         .fail(function() {
-          $(".loading").hide();
-          app._data.alertMessage = 'The selected architecture is not currently available';
-          app._data.type = 'info';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The selected architecture is not currently available', 'info') ;
         });
       },
+
       /*Read the JSON of new architecture*/
       read_arch(e){
         $(".loading").show();
 
         e.preventDefault();
-        if(!this.name_arch || !this.load_arch){
-          $(".loading").hide();
-          app._data.alertMessage = 'Please complete all fields';
-          app._data.type = 'danger';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
+        if(!this.name_arch || !this.load_arch) {
+          show_notification('Please complete all fields', 'danger') ;
           return;
         }
 
@@ -680,16 +683,7 @@ try{
             localStorage.setItem("load_architectures_available", auxArch);
           }
 
-          app._data.alertMessage = 'The selected architecture has been loaded correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()});
+          show_notification('The selected architecture has been loaded correctly', 'success') ;
           
           app._data.name_arch = '';
           app._data.description_arch = '';
@@ -751,16 +745,7 @@ try{
         auxArch = JSON.stringify(load_architectures_available, null, 2);
         localStorage.setItem("load_architectures_available", auxArch);
 
-        app._data.alertMessage = 'Architecture deleted successfully';
-        app._data.type = 'success';
-        app.$bvToast.toast(app._data.alertMessage, {
-          variant: app._data.type,
-          solid: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 1500,
-        });
-        var date = new Date();
-        notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+        show_notification('Architecture deleted successfully', 'success') ;
       },
       /*Save the current architecture in a JSON file*/
       arch_save(){
@@ -791,16 +776,7 @@ try{
 
         downloadLink.click();
 
-        app._data.alertMessage = 'Save architecture';
-        app._data.type = 'success';
-        app.$bvToast.toast(app._data.alertMessage, {
-          variant: app._data.type,
-          solid: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 1500,
-        });
-        var date = new Date();
-        notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+        show_notification('Save architecture', 'success') ;
       },
       /*Change the execution mode of architecture editor*/
       change_mode(){
@@ -829,18 +805,7 @@ try{
             architecture.memory_layout = auxArchitecture.memory_layout;
             app._data.architecture = architecture;
 
-            $(".loading").hide();
-            app._data.alertMessage = 'The memory layout has been reset correctly';
-            app._data.type = 'success';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            })
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-            
+            show_notification('The memory layout has been reset correctly', 'success') ;
             return;
           }
         }
@@ -852,17 +817,7 @@ try{
           architecture.memory_layout = auxArchitecture2.memory_layout;
           app._data.architecture = architecture;
 
-          $(".loading").hide();
-          app._data.alertMessage = 'The memory layout has been reset correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          })
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The memory layout has been reset correctly', 'success') ;
         });
       },
       /*Check de memory layout changes*/
@@ -873,64 +828,28 @@ try{
           if(this.memory_layout[i] != "" && this.memory_layout[i] != null){
             if(!isNaN(parseInt(this.memory_layout[i]))){
               auxMemoryLayout[i].value = parseInt(this.memory_layout[i]);
-              if(auxMemoryLayout[i].value < 0){
-                app._data.alertMessage = 'The value can not be negative';
-                app._data.type = 'danger';
-                app.$bvToast.toast(app._data.alertMessage, {
-                  variant: app._data.type,
-                  solid: true,
-                  toaster: "b-toaster-top-center",
-                  autoHideDelay: 1500,
-                });
-                var date = new Date();
-                notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+              if (auxMemoryLayout[i].value < 0) {
+                show_notification('The value can not be negative', 'danger') ;
                 return;
               }
             }
             else{
-              app._data.alertMessage = 'The value must be a number';
-              app._data.type = 'danger';
-              app.$bvToast.toast(app._data.alertMessage, {
-                variant: app._data.type,
-                solid: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 1500,
-              });
-              var date = new Date();
-              notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-              return;
+                show_notification('The value must be a number', 'danger') ;
+                return;
             }
           }
         }
 
         for(var i = 0; i < 6; i++){
-          /*if(i%2 == 0 && auxMemoryLayout[i].value % 4 != 0){
-            app._data.alertMessage = 'The memory must be aligned';
-            app._data.type = 'danger';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            });
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()});  
-            return;
+          /*if (i%2 == 0 && auxMemoryLayout[i].value % 4 != 0){
+                show_notification('The memory must be aligned', 'danger') ;
+                return;
           }*/
 
           for(var j = i; j < 6; j++){
-            if(auxMemoryLayout[i].value > auxMemoryLayout[j].value){
-              app._data.alertMessage = 'The segment can not be overlap';
-              app._data.type ='danger';
-              app.$bvToast.toast(app._data.alertMessage, {
-                variant: app._data.type,
-                solid: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 1500,
-              });
-              var date = new Date();
-              notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-              return;
+            if (auxMemoryLayout[i].value > auxMemoryLayout[j].value){
+                show_notification('The segment can not be overlap', 'danger') ;
+                return;
             }
           }
         }
@@ -987,18 +906,7 @@ try{
               app._data.architecture_hash = architecture_hash;
             }
 
-            $(".loading").hide();
-            app._data.alertMessage = 'The registers has been reset correctly';
-            app._data.type = 'success';
-            app.$bvToast.toast(app._data.alertMessage, {
-              variant: app._data.type,
-              solid: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 1500,
-            });
-            var date = new Date();
-            notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
-            
+            show_notification('The registers has been reset correctly', 'success') ;
             return;
           }
         }
@@ -1017,34 +925,17 @@ try{
             app._data.architecture_hash = architecture_hash;
           }
 
-          $(".loading").hide();
-          app._data.alertMessage = 'The registers has been reset correctly';
-          app._data.type = 'success';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-          var date = new Date();
-          notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+          show_notification('The registers has been reset correctly', 'success') ;
         });
       },
       /*Verify all field of new component*/
       newComponentVerify(evt){
         evt.preventDefault();
         if (!this.formArchitecture.name || !this.formArchitecture.type){
-          app._data.alertMessage = 'Please complete all fields';
-          app._data.type = 'danger';
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
+            show_notification('Please complete all fields', 'danger') ;
         } 
         else{
-          this.newComponent();
+            this.newComponent();
         }
       },
       /*Create a new component*/
@@ -4605,6 +4496,13 @@ try{
             $("#playExecution").show();
             return;
           }
+          else if(this.resetBut == true){
+            app._data.resetBut = false;
+
+            $("#stopExecution").hide();
+            $("#playExecution").show();
+            return;
+          }
           else{
             this.executeInstruction();
             iter1 = 0;
@@ -5964,6 +5862,7 @@ try{
             break;
         }
       },
+
       /*Exception Notification*/
       exception(error){
         app._data.alertMessage = "There is been an exception. Error description: '" + error;
@@ -6000,6 +5899,7 @@ try{
           reset() ;
 
           // reset UI
+          app._data.resetBut = true;
           for (var i = 0; i < instructions.length; i++) {
             instructions[i]._rowVariant = '';
           }
@@ -6020,6 +5920,7 @@ try{
           $(".loading").hide();
         }, 25);
       },
+
       /*Enter a breakpoint*/
       breakPoint(record, index){
         for (var i = 0; i < instructions.length; i++) {
@@ -6038,6 +5939,7 @@ try{
           app._data.instructions[index].Break = null;
         }
       },
+
       /*Console mutex*/
       consoleEnter(){
         if(this.keyboard != ""){
@@ -6049,6 +5951,7 @@ try{
         this.keyboard = "";
         this.display = "";
       },
+
       /*Convert hexadecimal number to floating point number*/
       hex2float ( hexvalue ){
         /*var sign     = (hexvalue & 0x80000000) ? -1 : 1;
@@ -6079,6 +5982,7 @@ try{
         new Uint8Array( buffer ).set( value_bit.match(/.{8}/g).map( binaryStringToInt ) );
         return new DataView( buffer ).getFloat32(0, false);
       },
+
       /*Convert hexadecimal number to double floating point number*/
       hex2double ( hexvalue ){
         var value = hexvalue.split('x');
@@ -6400,6 +6304,8 @@ try{
     } ;
     textarea_assembly_editor.addKeyMap(map);*/
   }
+
+
 
 
 
