@@ -8,10 +8,10 @@
    // (1) Usage
    //
 
-   if (process.argv.length < 3)
+   if (process.argv.length < 4)
    {
        console.log("") ;
-       console.log("Usage: creator.sh <architecture> <assembly file>.s") ;
+       console.log("Usage: creator.sh <architecture> <assembly file>") ;
        console.log("") ;
 
        return 0 ;
