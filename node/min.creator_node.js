@@ -4590,15 +4590,23 @@ function assembly_compile ( code )
 
 function load_architecture ( arch_str )
 {
-	var ret = {} ;
+    var ret = {} ;
 
-    bigInt = BigInt ;
-	arch_obj = JSON.parse(arch_str) ;
+    if (typeof bigInt === "undefined") {
+        bigInt = BigInt ;
+    }
+
+    arch_obj = JSON.parse(arch_str) ;
     ret = load_arch_select(arch_obj) ;
 
-	return ret ;
+    return ret ;
 }
 
 
+//
+// Module interface
+//
+
 module.exports.load_architecture = load_architecture ;
 module.exports.assembly_compile = assembly_compile ;
+
