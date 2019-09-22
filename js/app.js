@@ -448,25 +448,6 @@ try{
         }
       },
 
-      show_notification ( msg, type )
-      {
-          $(".loading").hide();
-          app._data.alertMessage = msg ;
-          app._data.type = type ;
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-
-          var date = new Date();
-          notifications.push({ mess: app._data.alertMessage, 
-                               color: app._data.type, 
-                               time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), 
-                               date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear() }); 
-      },
-
       /*Architecture editor*/
 
       /*Load the available architectures and check if exists backup*/
@@ -5879,6 +5860,7 @@ try{
         executionIndex = -1;
         return;
       },
+
       /*Divides a double into two parts*/
       divDouble(reg, index){
             var value = this.bin2hex(this.double2bin(reg));
@@ -5889,6 +5871,25 @@ try{
             if(index == 1) {
               return "0x" + value.substring(8,16);
             }
+      },
+
+      show_notification ( msg, type )
+      {
+          $(".loading").hide();
+          app._data.alertMessage = msg ;
+          app._data.type = type ;
+          app.$bvToast.toast(app._data.alertMessage, {
+            variant: app._data.type,
+            solid: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 1500,
+          });
+
+          var date = new Date();
+          notifications.push({ mess: app._data.alertMessage, 
+                               color: app._data.type, 
+                               time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), 
+                               date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear() }); 
       },
 
       /*Reset execution*/
