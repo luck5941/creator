@@ -3598,7 +3598,8 @@ try{
       },
 
       /*Execute one instruction*/
-      executeInstruction() {
+      executeInstruction() 
+      {
         console_log(mutexRead);
         newExecution = false;
 
@@ -4468,8 +4469,14 @@ try{
 
         this.programExecutionInst();
       },
-      programExecutionInst(){
-        for (var i = 0; i < 12 && executionIndex >= 0; i++) {
+
+      programExecutionInst() 
+      {
+	var cfg_instructions_per_slot = 16 ;
+	var cfg_delay_between_slots   = 10 ;
+
+        for (var i = 0; (i < cfg_instructions_per_slot) && (executionIndex >= 0); i++) 
+	{
           if(mutexRead == true){
             iter1 = 1;
             $("#stopExecution").hide();
@@ -4502,14 +4509,15 @@ try{
           }
         }
 
-        if(executionIndex >= 0){
-          setTimeout(this.programExecutionInst, 25);
+        if(executionIndex >= 0) {
+           setTimeout(this.programExecutionInst, cfg_delay_between_slots);
         }
         else{
           $("#stopExecution").hide();
           $("#playExecution").show();
         }
       },
+
       /*Stop program excution*/
       stopExecution(){
         app._data.runExecution = true;

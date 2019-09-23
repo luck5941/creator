@@ -4548,10 +4548,26 @@ function bigInt_deserialize(object){
   return auxObject;
 }
 
-
 /*
- * Creator UI
+ *  Copyright 2018-2019 Felix Garcia Carballeira, Alejandro Calderon Mateos, Diego Camarmas Alonso
+ *
+ *  This file is part of CREATOR.
+ *
+ *  CREATOR is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  CREATOR is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with CREATOR.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+
 
       function show_notification ( msg, type )
       {
@@ -8172,7 +8188,8 @@ try{
       },
 
       /*Execute one instruction*/
-      executeInstruction() {
+      executeInstruction() 
+      {
         console_log(mutexRead);
         newExecution = false;
 
@@ -9042,8 +9059,14 @@ try{
 
         this.programExecutionInst();
       },
-      programExecutionInst(){
-        for (var i = 0; i < 12 && executionIndex >= 0; i++) {
+
+      programExecutionInst() 
+      {
+	var cfg_instructions_per_slot = 16 ;
+	var cfg_delay_between_slots   = 10 ;
+
+        for (var i = 0; (i < cfg_instructions_per_slot) && (executionIndex >= 0); i++) 
+	{
           if(mutexRead == true){
             iter1 = 1;
             $("#stopExecution").hide();
@@ -9076,14 +9099,15 @@ try{
           }
         }
 
-        if(executionIndex >= 0){
-          setTimeout(this.programExecutionInst, 25);
+        if(executionIndex >= 0) {
+           setTimeout(this.programExecutionInst, cfg_delay_between_slots);
         }
         else{
           $("#stopExecution").hide();
           $("#playExecution").show();
         }
       },
+
       /*Stop program excution*/
       stopExecution(){
         app._data.runExecution = true;
