@@ -1,3 +1,23 @@
+/*
+ *  Copyright 2018-2019 Felix Garcia Carballeira, Alejandro Calderon Mateos, Diego Camarmas Alonso
+ *
+ *  This file is part of CREATOR.
+ *
+ *  CREATOR is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  CREATOR is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with CREATOR.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 /********************
  * Global variables *
  ********************/
@@ -55,7 +75,9 @@ var actionTypes = [
 
 
 
-/*Compilator*/
+/*
+ * Compilator
+ */
 
 /*Assembly code textarea*/
 var code_assembly = '';
@@ -93,8 +115,8 @@ var compileError = [
   { mess1: "This field is too small to encode in binary '", mess2: "" },
   { mess1: "Incorrect pseudoinstruction definition ", mess2: "" },
   { mess1: "Invalid directive: ", mess2: "" },
-  { mess1: "Invalid data: ", mess2: " The data must be a number" }, 
-  { mess1: 'The string of characters must start with "', mess2: "" }, 
+  { mess1: "Invalid data: ", mess2: " The data must be a number" },
+  { mess1: 'The string of characters must start with "', mess2: "" },
   { mess1: "Number '", mess2: "' is too big" },
   { mess1: "Number '", mess2: "' is empty" },
   { mess1: "The text segment should start with '", mess2: "'" },
@@ -109,7 +131,9 @@ let promise;
 
 
 
-/*Simulator*/
+/*
+ * Simulator
+ */
 
 /*Displayed notifications*/
 var notifications = [];
@@ -157,17 +181,20 @@ var stats = [
 ];
 
 
+//
+// Load architecture
+//
 
-function load_arch_select(cfg){
-
-		var ret = {};
+function load_arch_select(cfg)
+{
+    var ret = {};
 
     var auxArchitecture = cfg;
     architecture = bigInt_deserialize(auxArchitecture);
 
     architecture_hash = [];
     for (var i = 0; i < architecture.components.length; i++){
-      architecture_hash.push({name: architecture.components[i].name, index: i}); 
+      architecture_hash.push({name: architecture.components[i].name, index: i});
     }
 
     backup_stack_address = architecture.memory_layout[4].value;
@@ -179,96 +206,111 @@ function load_arch_select(cfg){
 }
 
 
+//
+// Lex. functions
+//
 
+var debug = false ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function console_log ( msg )
+{
+	if (debug) {
+	    console.log(msg) ;
+        }
+}
 
 /*Places the pointer in the first position*/
-function first_token() 
+function first_token()
 {
   var index = tokenIndex;
 
-  while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r') || (assembly.charAt(index) == '#')) && (index < assembly.length)){
-    while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-      index++;
-    }
+  while ( (":\t\n \r#".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+//while ( 
+//	  ((assembly.charAt(index) == ':') || 
+//	   (assembly.charAt(index) == '\t') || 
+//	   (assembly.charAt(index) == '\n') || 
+//	   (assembly.charAt(index) == ' ') || 
+//	   (assembly.charAt(index) == '\r') || 
+//	   (assembly.charAt(index) == '#')) && (index < assembly.length))
+	{
+            while ( (":\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+	  //while(((assembly.charAt(index) == ':') || 
+	//	    (assembly.charAt(index) == '\t') || 
+	//	    (assembly.charAt(index) == '\n') || 
+	//	    (assembly.charAt(index) == ' ') || 
+	//	    (assembly.charAt(index) == '\r')) && (index < assembly.length))
+	    {
+	      index++;
+	    }
 
-    if(assembly.charAt(index) == '#'){
-      while((assembly.charAt(index) != '\n') && (index < assembly.length)){
-        index++;
-      }
+            if (assembly.charAt(index) == '#')
+	    {
+              while((assembly.charAt(index) != '\n') && (index < assembly.length)){
+                index++;
+              }
 
-      while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-        index++;
-      }
-    }
-  }
+              while ( (":\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+           // while(((assembly.charAt(index) == ':') || 
+	   //         (assembly.charAt(index) == '\t') || 
+	   //         (assembly.charAt(index) == '\n') || 
+	   //         (assembly.charAt(index) == ' ') || 
+	   //         (assembly.charAt(index) == '\r')) && (index < assembly.length))
+	      {
+                index++;
+              }
+            }
+        }
 
   tokenIndex = index;
 }
 
 /*Read token*/
-function get_token(){
+function get_token()
+{
   var index = tokenIndex;
 
   if(index >= assembly.length){
     return null;
   }
 
-  console.log(assembly.charAt(index));
-  console.log(index);
+  console_log(assembly.charAt(index));
+  console_log(index);
 
   if(assembly.charAt(index) == "'"){
     index++;
     while(assembly.charAt(index) != "'" && index < assembly.length){
-      console.log(assembly.charAt(index));
-      console.log(index);
+      console_log(assembly.charAt(index));
+      console_log(index);
       index++;
     }
     index++;
 
-    console.log(assembly.substring(tokenIndex, index));
-    console.log(index);
-    console.log(assembly.substring(tokenIndex, index));
+    console_log(assembly.substring(tokenIndex, index));
+    console_log(index);
+    console_log(assembly.substring(tokenIndex, index));
     return assembly.substring(tokenIndex, index);
   }
 
   if(assembly.charAt(index) == '"'){
     index++;
     while(assembly.charAt(index) != '"' && index < assembly.length){
-      console.log(assembly.charAt(index));
-      console.log(index);
+      console_log(assembly.charAt(index));
+      console_log(index);
       index++;
     }
     index++;
 
-    console.log(assembly.substring(tokenIndex, index));
-    console.log(index);
-    console.log(assembly.substring(tokenIndex, index));
+    console_log(assembly.substring(tokenIndex, index));
+    console_log(index);
+    console_log(assembly.substring(tokenIndex, index));
     return assembly.substring(tokenIndex, index);
   }
 
 
 
-  if((assembly.charAt(index) == '(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
+  if((assembly.charAt(index) == '(') || 
+   (assembly.charAt(index) == '[') || 
+   (assembly.charAt(index) == '{')){
     index++;
   }
 
@@ -277,7 +319,10 @@ function get_token(){
   }
 
   var res;
-  if((assembly.charAt(index) == ':') || (assembly.charAt(index) == ')') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '}')){
+  if((assembly.charAt(index) == ':') || 
+   (assembly.charAt(index) == ')') || 
+   (assembly.charAt(index) == ']') || 
+   (assembly.charAt(index) == '}')){
     res = assembly.substring(tokenIndex, index) + assembly.charAt(index);
   }
   else{
@@ -293,11 +338,11 @@ function next_token()
 {
   var index = tokenIndex;
 
-  console.log(assembly.charAt(index));
+  console_log(assembly.charAt(index));
   if(assembly.charAt(index) == "'"){
     index++;
     while(assembly.charAt(index) != "'" && index < assembly.length){
-      console.log(assembly.charAt(index));
+      console_log(assembly.charAt(index));
       index++;
     }
     index++;
@@ -306,44 +351,104 @@ function next_token()
   if(assembly.charAt(index) == '"'){
     index++;
     while(assembly.charAt(index) != '"' && index < assembly.length){
-      console.log(assembly.charAt(index));
+      console_log(assembly.charAt(index));
       index++;
     }
     index++;
   }
 
-  if((assembly.charAt(index) == '(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
+  if((assembly.charAt(index) == '(') || 
+   (assembly.charAt(index) == '[') || 
+   (assembly.charAt(index) == '{')){
     index++;
   }
 
-  while((assembly.charAt(index) != ',') && (assembly.charAt(index) != '(') && (assembly.charAt(index) != ')') && (assembly.charAt(index) != '[') && (assembly.charAt(index) != ']') && (assembly.charAt(index) != '{') && (assembly.charAt(index) != '}') && (assembly.charAt(index) != ':') && (assembly.charAt(index) != '#') && (assembly.charAt(index) != '\t') && (assembly.charAt(index) != '\n') && (assembly.charAt(index) != ' ') && (assembly.charAt(index) != '\r') && (index < assembly.length)){
-    index++;
-  }
+  while ( (",()[]{}:#\t\n \r".indexOf(assembly.charAt(index)) == -1) && (index < assembly.length) )
+//while ( (assembly.charAt(index) != ',') && 
+//	  (assembly.charAt(index) != '(') && 
+//	  (assembly.charAt(index) != ')') && 
+//	  (assembly.charAt(index) != '[') && 
+//	  (assembly.charAt(index) != ']') && 
+//	  (assembly.charAt(index) != '{') && 
+//	  (assembly.charAt(index) != '}') && 
+//	  (assembly.charAt(index) != ':') && 
+//	  (assembly.charAt(index) != '#') && 
+//	  (assembly.charAt(index) != '\t') && 
+//	  (assembly.charAt(index) != '\n') && 
+//	  (assembly.charAt(index) != ' ') && 
+//	  (assembly.charAt(index) != '\r') && 
+//	  (index < assembly.length))
+	{
+           index++;
+        }
 
-  while(((assembly.charAt(index) == ',') || (assembly.charAt(index) == '(') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '{') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r') || (assembly.charAt(index) == '#')) && (index < assembly.length)){
+  while ( (",()[]{}:\t\n \r#".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+//while(((assembly.charAt(index) == ',') || 
+// (assembly.charAt(index) == '(') || 
+// (assembly.charAt(index) ==')') || 
+// (assembly.charAt(index) == '[') || 
+// (assembly.charAt(index) == ']') || 
+// (assembly.charAt(index) == '{') || 
+// (assembly.charAt(index) == '}') || 
+// (assembly.charAt(index) == ':') || 
+// (assembly.charAt(index) == '\t') || 
+// (assembly.charAt(index) == '\n') || 
+// (assembly.charAt(index) == ' ') || 
+// (assembly.charAt(index) == '\r') || 
+// (assembly.charAt(index) == '#')) && (index < assembly.length))
+  {
+    while ( (",)]}:\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+//  while(((assembly.charAt(index) ==',') || 
+//	    (assembly.charAt(index) ==')') || 
+//	    (assembly.charAt(index) == ']') || 
+//	    (assembly.charAt(index) == '}') || 
+//	    (assembly.charAt(index) == ':') || 
+//	    (assembly.charAt(index) == '\t') || 
+//	    (assembly.charAt(index) == '\n') || 
+//	    (assembly.charAt(index) == ' ') || 
+//	    (assembly.charAt(index) == '\r')) && (index < assembly.length))
+	  {
+            index++;
+          }
 
-    while(((assembly.charAt(index) ==',') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-      index++;
-    }
-
-    if((assembly.charAt(index) =='(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
+    if ((assembly.charAt(index) =='(') || 
+	(assembly.charAt(index) == '[') || 
+	(assembly.charAt(index) == '{'))
+    {
       break;
     }
 
-    if(assembly.charAt(index) == '#'){
-      while((assembly.charAt(index) != '\n') && (index < assembly.length)){
+    if (assembly.charAt(index) == '#')
+    {
+      while ((assembly.charAt(index) != '\n') && (index < assembly.length)){
         index++;
       }
 
-      while(((assembly.charAt(index) == '(') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '{') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-        index++;
-      }
+      while ( ("()[]{}:\t\n \r".indexOf(assembly.charAt(index)) != -1) && (index < assembly.length) )
+    //while(((assembly.charAt(index) == '(') || 
+//	      (assembly.charAt(index) ==')') || 
+//	      (assembly.charAt(index) == '[') || 
+//	      (assembly.charAt(index) == ']') || 
+//	      (assembly.charAt(index) == '{') || 
+//	      (assembly.charAt(index) == '}') || 
+//	      (assembly.charAt(index) == ':') || 
+//	      (assembly.charAt(index) == '\t') || 
+//	      (assembly.charAt(index) == '\n') || 
+//	      (assembly.charAt(index) == ' ') || 
+//	      (assembly.charAt(index) == '\r')) && (index < assembly.length))
+	    {
+               index++;
+            }
     }
   }
   tokenIndex = index;
 }
 
-/*Compile assembly code*/
+
+/*
+ * Compile assembly code
+ */
+
 function assembly_compiler(assembly_code)
 {
 	var ret = {
@@ -427,7 +532,7 @@ function assembly_compiler(assembly_code)
 
     var date = new Date();
     var auxDate = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+" - "+date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
-    //console.log(app._data.architecture_name);
+    //console_log(app._data.architecture_name);
     /*localStorage.setItem("arch_name", app._data.architecture_name);
     localStorage.setItem("architecture_copy", auxArch);
     localStorage.setItem("assembly_copy", textarea_assembly_editor.getValue());
@@ -446,11 +551,11 @@ function assembly_compiler(assembly_code)
   }
 
   token = get_token();
-  console.log(token)
+  console_log(token)
 
   while(!empty){
     token = get_token();
-    console.log(token)
+    console_log(token)
 
     if(token == null){
       empty = true;
@@ -463,7 +568,7 @@ function assembly_compiler(assembly_code)
       if(token == architecture.directives[i].name){
         switch(architecture.directives[i].action){
           case "data_segment":
-            console.log("data_segment")
+            console_log("data_segment")
             var result = data_segment_compiler();
             if(result == 0){
               change = true;
@@ -487,7 +592,7 @@ function assembly_compiler(assembly_code)
             }
             break;
           case "code_segment":
-            console.log("code_segment")
+            console_log("code_segment")
             var result = code_segment_compiler();
             if(result == 0){
               change = true;
@@ -520,14 +625,14 @@ function assembly_compiler(assembly_code)
               re = new RegExp(",", "g");
               token = token.replace(re, "");
 
-              console.log(token)
+              console_log(token)
               extern.push(token);
               change = true;
 
               next_token();
               token = get_token();
 
-              console.log(token)
+              console_log(token)
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
@@ -538,7 +643,7 @@ function assembly_compiler(assembly_code)
 
             break;
           default:
-            console.log("default")
+            console_log("default")
             empty = true;
             break;
         }
@@ -553,7 +658,7 @@ function assembly_compiler(assembly_code)
         ret.tokenIndex = tokenIndex;
         tokenIndex = 0;
         return ret ;
-      } 
+      }
     }
   }
 
@@ -577,7 +682,7 @@ function assembly_compiler(assembly_code)
     var signatureParts = pending_instructions[i].signature;
     var signatureRawParts = pending_instructions[i].signatureRaw;
     var instructionParts = (pending_instructions[i].instruction).split(' ');
-    console.log(instructionParts);
+    console_log(instructionParts);
     for (var j = 0; j < signatureParts.length && exit == 0; j++){
       if(signatureParts[j] == "inm" || signatureParts[j] == "address"){
         for (var z = 0; z < instructions.length && exit == 0; z++){
@@ -609,9 +714,9 @@ function assembly_compiler(assembly_code)
               if(aux == instructions[w].Address){
                 instructions[w].loaded = newInstruction;
                 var fieldsLength = startbit - stopbit + 1;
-                console.log(w)
-                console.log(numBinaries)
-                console.log(w - numBinaries)
+                console_log(w)
+                console_log(numBinaries)
+                console_log(w - numBinaries)
                 instructions_binary[w - numBinaries].loaded = instructions_binary[w - numBinaries].loaded.substring(0, instructions_binary[w - numBinaries].loaded.length - (startbit + 1)) + bin.padStart(fieldsLength, "0") + instructions_binary[w - numBinaries].loaded.substring(instructions_binary[w - numBinaries].loaded.length - stopbit, instructions_binary[w - numBinaries].loaded.length);
                 exit = 1;
               }
@@ -688,10 +793,10 @@ function assembly_compiler(assembly_code)
             var stopbit = pending_instructions[i].stopBit;
 
             addr = ((addr - pending_instructions[i].address)/4)-1;
-            console.log(instructionParts);
-            console.log(addr);
+            console_log(instructionParts);
+            console_log(addr);
             var bin = parseInt(addr).toString(2);
-            console.log(bin);
+            console_log(bin);
 
             instructionParts[j] = addr;
             var newInstruction = "";
@@ -715,10 +820,10 @@ function assembly_compiler(assembly_code)
               if(aux == instructions[w].Address){
                 instructions[w].loaded = newInstruction;
                 var fieldsLength = startbit - stopbit + 1;
-                console.log(w);
-                console.log(numBinaries);
-                console.log(w - numBinaries);
-                console.log(bin.padStart(fieldsLength, "0"));
+                console_log(w);
+                console_log(numBinaries);
+                console_log(w - numBinaries);
+                console_log(bin.padStart(fieldsLength, "0"));
                 instructions_binary[w - numBinaries].loaded = instructions_binary[w - numBinaries].loaded.substring(0, instructions_binary[w - numBinaries].loaded.length - (startbit + 1)) + bin.padStart(fieldsLength, "0") + instructions_binary[w - numBinaries].loaded.substring(instructions_binary[w - numBinaries].loaded.length - stopbit, instructions_binary[w - numBinaries].loaded.length);
                 exit = 1;
               }
@@ -779,9 +884,9 @@ function assembly_compiler(assembly_code)
               if(aux == instructions[w].Address){
                 instructions[w].loaded = newInstruction;
                 var fieldsLength = startbit - stopbit + 1;
-                console.log(w)
-                console.log(numBinaries)
-                console.log(w - numBinaries)
+                console_log(w)
+                console_log(numBinaries)
+                console_log(w - numBinaries)
                 instructions_binary[w - numBinaries].loaded = instructions_binary[w - numBinaries].loaded.substring(0, instructions_binary[w - numBinaries].loaded.length - (startbit + 1)) + bin.padStart(fieldsLength, "0") + instructions_binary[w - numBinaries].loaded.substring(instructions_binary[w - numBinaries].loaded.length - stopbit, instructions_binary[w - numBinaries].loaded.length);
                 exit = 1;
               }
@@ -855,7 +960,7 @@ function assembly_compiler(assembly_code)
         }
         else{
           if(a == 0){
-            console.log(label);
+            console_log(label);
             (memory[memory_hash[1]][memory[memory_hash[1]].length-1].Binary).splice(auxAddr%4, 1, {Addr: (auxAddr), DefBin: "**", Bin: "**", Tag: label},);
           }
           else{
@@ -905,7 +1010,7 @@ function assembly_compiler(assembly_code)
       }
       else{
         if(a == 0){
-          console.log(label);
+          console_log(label);
           (memory[memory_hash[1]][memory[memory_hash[1]].length-1].Binary).splice(auxAddr%4, 1, {Addr: (auxAddr), DefBin: hex.substring(hex.length-(2+(2*a)), hex.length-(2*a)), Bin: hex.substring(hex.length-(2+(2*a)), hex.length-(2*a)), Tag: label},);
         }
         else{
@@ -990,7 +1095,7 @@ function assembly_compiler(assembly_code)
           break;
         }
       }
-    } 
+    }
   }
 
   /*Save tags*/
@@ -1012,20 +1117,20 @@ function assembly_compiler(assembly_code)
           break;
         }
       }
-    } 
+    }
   }
 
   //app._data.instructions = instructions;
 
   /*Initialize stack*/
   memory[memory_hash[2]].push({Address: stack_address, Binary: [], Value: null, DefValue: null, reset: false, unallocated: false});
-  
+
   for(var i = 0; i<4; i++){
     (memory[memory_hash[2]][memory[memory_hash[2]].length-1].Binary).push({Addr: stack_address + i, DefBin: "00", Bin: "00", Tag: null},);
   }
 
   tokenIndex = 0;
-  
+
   reset();
 
   address = architecture.memory_layout[0].value;
@@ -1049,7 +1154,7 @@ function data_segment_compiler(){
 
   while(existsData){
     token = get_token();
-    console.log(token);
+    console_log(token);
 
     var label = "";
 
@@ -1057,7 +1162,7 @@ function data_segment_compiler(){
       break;
     }
 
-    console.log(token)
+    console_log(token)
 
     var found = false;
 
@@ -1072,8 +1177,8 @@ function data_segment_compiler(){
       }
 
       for(var i = 0; i < data_tag.length; i++){
-        console.log(data_tag[i].tag);
-        console.log(token.substring(0,token.length-1))
+        console_log(data_tag[i].tag);
+        console_log(token.substring(0,token.length-1))
         if(data_tag[i].tag == token.substring(0,token.length-1)){
         	ret.status = "error" ;
 	        ret.errorcode = 1;
@@ -1090,7 +1195,7 @@ function data_segment_compiler(){
 	        ret.token = token.substring(0,token.length-1);
 	        ret.tokenIndex = tokenIndex;
           return ret;
-        } 
+        }
       }
 
       label = token.substring(0,token.length-1);
@@ -1129,20 +1234,20 @@ function data_segment_compiler(){
               re = new RegExp(",", "g");
               token = token.replace(re, "");
 
-              console.log("byte")
-              console.log(token)
+              console_log("byte")
+              console_log(token)
 
               var auxToken;
               var auxTokenString;
 
               if(token.match(/^\'(.*?)\'$/)){
                 var re = /^\'(.*?)\'$/;
-                console.log(re);
+                console_log(re);
                 var match = re.exec(token);
-                console.log(match);
+                console_log(match);
                 var asciiCode;
 
-                console.log(match[1]);
+                console_log(match[1]);
 
                 if(token.search(/^\'\\n\'$/) != -1){
                   asciiCode = 10;
@@ -1154,7 +1259,7 @@ function data_segment_compiler(){
                   asciiCode = match[1].charCodeAt(0);
                 }
 
-                console.log(asciiCode);
+                console_log(asciiCode);
                 auxTokenString = asciiCode.toString(16);
               }
               else if(token.match(/^0x/)){
@@ -1207,8 +1312,8 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
-              console.log(auxTokenString)
+
+              console_log(auxTokenString)
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, parseInt(auxTokenString, 16)) == -1){
                 return -1;
@@ -1216,13 +1321,13 @@ function data_segment_compiler(){
 
               label = null;
 
-              console.log(memory[memory_hash[0]]);
-              console.log("byte Terminado");
+              console_log(memory[memory_hash[0]]);
+              console_log("byte Terminado");
 
               next_token();
               token = get_token();
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
@@ -1235,7 +1340,7 @@ function data_segment_compiler(){
 
             break;
           case "half_word":
-            console.log("half_word")
+            console_log("half_word")
 
             var ishalf = true;
 
@@ -1264,8 +1369,8 @@ function data_segment_compiler(){
               re = new RegExp(",", "g");
               token = token.replace(re, "");
 
-              console.log("half_word");
-              console.log(token);
+              console_log("half_word");
+              console_log(token);
 
               var auxToken;
               var auxTokenString;
@@ -1319,8 +1424,8 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
-              console.log(auxTokenString)
+
+              console_log(auxTokenString)
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, parseInt(auxTokenString, 16)) == -1){
                 return -1;
@@ -1328,13 +1433,13 @@ function data_segment_compiler(){
 
               label = null;
 
-              console.log(memory[memory_hash[0]]);
-              console.log("half Terminado");
+              console_log(memory[memory_hash[0]]);
+              console_log("half Terminado");
 
               next_token();
               token = get_token();
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
@@ -1352,7 +1457,7 @@ function data_segment_compiler(){
             next_token();
 
             while(isWord){
-              console.log("word")
+              console_log("word")
 
               token = get_token();
 
@@ -1376,7 +1481,7 @@ function data_segment_compiler(){
               re = new RegExp(",", "g");
               token = token.replace(re, "");
 
-              console.log(token);
+              console_log(token);
 
               var auxToken;
               var auxTokenString;
@@ -1429,8 +1534,8 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
-              console.log(auxTokenString);
+
+              console_log(auxTokenString);
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, (parseInt(auxTokenString, 16)) >> 0) == -1){
                 return -1;
@@ -1438,20 +1543,20 @@ function data_segment_compiler(){
 
               label = null;
 
-              console.log(memory[memory_hash[0]]);
-              console.log("word Terminado");
+              console_log(memory[memory_hash[0]]);
+              console_log("word Terminado");
 
               next_token();
               token = get_token();
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
                   isWord = false;
                 }
               }
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
             }
 
             j=0;
@@ -1463,7 +1568,7 @@ function data_segment_compiler(){
             next_token();
 
             while(isDoubleWord){
-              console.log("word");
+              console_log("word");
 
               token = get_token();
 
@@ -1487,7 +1592,7 @@ function data_segment_compiler(){
               re = new RegExp(",", "g");
               token = token.replace(re, "");
 
-              console.log(token);
+              console_log(token);
 
               var auxToken;
               var auxTokenString;
@@ -1540,27 +1645,27 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
+
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, parseInt(auxTokenString, 16)) == -1){
                 return -1;
               }
 
               label = null;
 
-              console.log(memory[memory_hash[0]]);
-              console.log("double word Terminado");
+              console_log(memory[memory_hash[0]]);
+              console_log("double word Terminado");
 
               next_token();
               token = get_token();
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
                   isDoubleWord = false;
                 }
               }
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
             }
 
             j=0;
@@ -1572,7 +1677,7 @@ function data_segment_compiler(){
             next_token();
 
             while(isFloat){
-              console.log("float");
+              console_log("float");
 
               token = get_token();
 
@@ -1596,7 +1701,7 @@ function data_segment_compiler(){
               re = new RegExp(",", "g");
               token = token.replace(re, "");
 
-              console.log(token);
+              console_log(token);
 
               var auxToken;
               var auxTokenString;
@@ -1649,8 +1754,8 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
-              console.log(auxTokenString);
+
+              console_log(auxTokenString);
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, token) == -1){
                 return -1;
@@ -1658,20 +1763,20 @@ function data_segment_compiler(){
 
               label = null;
 
-              console.log(memory[memory_hash[0]]);
-              console.log("float Terminado");
+              console_log(memory[memory_hash[0]]);
+              console_log("float Terminado");
 
               next_token();
               token = get_token();
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
                   isFloat = false;
                 }
               }
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
             }
 
             j=0;
@@ -1683,7 +1788,7 @@ function data_segment_compiler(){
             next_token();
 
             while(isDouble){
-              console.log("double");
+              console_log("double");
 
               token = get_token();
 
@@ -1691,7 +1796,7 @@ function data_segment_compiler(){
                 ret.status = "error" ;
 				        ret.errorcode = 23;
 				        ret.token = "";
-				        ret.tokenIndex = tokenIndex;     
+				        ret.tokenIndex = tokenIndex;
 
 				        return ret;
               }
@@ -1701,7 +1806,7 @@ function data_segment_compiler(){
                 ret.status = "error" ;
 				        ret.errorcode = 24;
 				        ret.token = token;
-				        ret.tokenIndex = tokenIndex;     
+				        ret.tokenIndex = tokenIndex;
 
 				        return ret;
               }
@@ -1709,7 +1814,7 @@ function data_segment_compiler(){
               re = new RegExp(",", "g")
               token = token.replace(re, "");
 
-              console.log(token);
+              console_log(token);
 
               var auxToken;
               var auxTokenString;
@@ -1751,7 +1856,7 @@ function data_segment_compiler(){
 					        ret.tokenIndex = tokenIndex;
 	                return ret;
                 }
-                auxToken = parseFloat(token, 10);console.log(auxTokenString);
+                auxToken = parseFloat(token, 10);console_log(auxTokenString);
                 auxTokenString = (bin2hex(double2bin(auxToken))).padStart(2*architecture.directives[j].size, "0");
                 if(auxTokenString.length > 2*architecture.directives[j].size){
                   ret.status = "error" ;
@@ -1762,8 +1867,8 @@ function data_segment_compiler(){
                 }
                 auxTokenString = auxTokenString.substring(auxTokenString.length-(2*architecture.directives[j].size), auxTokenString.length);
               }
-              
-              console.log(auxTokenString);
+
+              console_log(auxTokenString);
 
               if(data_compiler(auxTokenString, architecture.directives[j].size, label, token) == -1){
                 return -1;
@@ -1771,27 +1876,27 @@ function data_segment_compiler(){
 
               label = null;
 
-              console.log(memory[memory_hash[0]]);
-              console.log("double Terminado");
+              console_log(memory[memory_hash[0]]);
+              console_log("double Terminado");
 
               next_token();
               token = get_token();
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
                   isDouble = false;
                 }
               }
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
             }
 
             j=0;
 
             break;
           case "ascii_not_null_end":
-            console.log("ascii_not_null_end");
+            console_log("ascii_not_null_end");
 
             var isAscii = true;
             var nextToken = 1;
@@ -1799,19 +1904,19 @@ function data_segment_compiler(){
             next_token();
 
             while(isAscii){
-              console.log("ascii_not_null_end");
+              console_log("ascii_not_null_end");
 
               token = get_token();
-              console.log(token);
+              console_log(token);
 
               string = token;
 
               re = new RegExp('^"');
               string = string.replace(re, "");
-              console.log(string);
+              console_log(string);
               re = new RegExp('"$');
               string = string.replace(re, "");
-              console.log(string);
+              console_log(string);
 
               if(token == null){
                 break;
@@ -1824,13 +1929,13 @@ function data_segment_compiler(){
                 return -1;
               }
 
-              console.log(token);
+              console_log(token);
 
               re = new RegExp(",", "g");
               token = token.replace(re, "");
 
               re = new RegExp('^"');
-              console.log(re);
+              console_log(re);
               if(token.search(re) == -1){
                 ret.status = "error" ;
 					        ret.errorcode = 17;
@@ -1843,8 +1948,8 @@ function data_segment_compiler(){
               var final = false;
 
               re = new RegExp('"$');
-              console.log(re);
-              console.log(token);
+              console_log(re);
+              console_log(token);
               if(token.search(re) == -1){
                 string = token.substring(1, token.length);
               }
@@ -1852,18 +1957,18 @@ function data_segment_compiler(){
                 string = token.substring(1, token.length-1);
                 final = true;
               }
-              
+
               while(final == false){
                 next_token();
                 token = get_token();
-                console.log(token);
+                console_log(token);
 
                 if(token == null){
                   break;
                 }
 
                 re = new RegExp('(.)","(.)');
-                console.log(re);
+                console_log(re);
                 if(token.search(re) != -1){
                   ret.status = "error" ;
 					        ret.errorcode = 24;
@@ -1872,20 +1977,20 @@ function data_segment_compiler(){
 	                return ret;
                 }
 
-                console.log(token);
+                console_log(token);
 
                 re = new RegExp(",", "g")
                 token = token.replace(re, "");
 
                 re = new RegExp('^"');
-                console.log(re);
+                console_log(re);
                 if(token.search(re) != -1 && final == false){
                   string = string + " ";
                   final = true;
                 }
 
                 re = new RegExp('"$');
-                console.log(re);
+                console_log(re);
                 if(token.search(re) != -1 && final == false){
                   final = true;
                   string = string + " " + token.substring(0, token.length-1);
@@ -1897,10 +2002,10 @@ function data_segment_compiler(){
                 }
               }*/
 
-              console.log(string);
+              console_log(string);
 
               for(var i = 0; i < string.length; i++){
-                console.log(string.length);
+                console_log(string.length);
                 if((data_address % align) != 0 && i == 0 && align != 0){
                   while((data_address % align) != 0){
                     if(data_address % 4 == 0){
@@ -1933,7 +2038,7 @@ function data_segment_compiler(){
                   }
 
                   data_address++;
-                
+
                 }
                 else{
                   if(i == 0){
@@ -1953,7 +2058,7 @@ function data_segment_compiler(){
                   data_address++;
                 }
               }
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
 
               if(memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length < 4){
                 var num_iter = 4 - memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length;
@@ -1962,7 +2067,7 @@ function data_segment_compiler(){
                 }
               }
 
-              console.log("ascii_not_null_end Terminado");
+              console_log("ascii_not_null_end Terminado");
 
               if(nextToken == 1){
                 next_token();
@@ -1971,32 +2076,32 @@ function data_segment_compiler(){
 
               nextToken = 1;
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
                   isAscii = false;
                 }
               }
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
             }
 
             j=0;
 
             break;
           case "ascii_null_end":
-            console.log("ascii_null_end");
-            
+            console_log("ascii_null_end");
+
             var isAscii = true;
             var nextToken = 1;
 
             next_token();
 
             while(isAscii){
-              console.log("ascii_null_end")
+              console_log("ascii_null_end")
 
               token = get_token();
-              console.log(token);
+              console_log(token);
 
               if(token == null){
                 break;
@@ -2006,10 +2111,10 @@ function data_segment_compiler(){
 
               re = new RegExp('^"');
               string = string.replace(re, "");
-              console.log(string);
+              console_log(string);
               re = new RegExp('"$');
               string = string.replace(re, "");
-              console.log(string);
+              console_log(string);
 
               /*re = new RegExp('(.)","(.)');
               if(token.search(re) != -1){
@@ -2022,7 +2127,7 @@ function data_segment_compiler(){
               token = token.replace(re, "");
 
               re = new RegExp('^"');
-              console.log(re)
+              console_log(re)
               if(token.search(re) == -1){
                 ret.status = "error" ;
 					        ret.errorcode = 17;
@@ -2033,10 +2138,10 @@ function data_segment_compiler(){
 
               var string = "";
               var final = false;
-              
+
               re = new RegExp('"$');
-              console.log(re);
-              console.log(token);
+              console_log(re);
+              console_log(token);
               if(token.search(re) == -1){
                 string = token.substring(1, token.length);
               }
@@ -2044,17 +2149,17 @@ function data_segment_compiler(){
                 string = token.substring(1, token.length-1);
                 final = true;
               }
-              
+
               while(final == false){
                 next_token();
                 token = get_token();
-                console.log(token);
+                console_log(token);
                 if(token == null){
                   break;
                 }
 
                 re = new RegExp('(.)","(.)');
-                console.log(re);
+                console_log(re);
                 if(token.search(re) != -1){
                   ret.status = "error" ;
 					        ret.errorcode = 24;
@@ -2067,14 +2172,14 @@ function data_segment_compiler(){
                 token = token.replace(re, "");
 
                 re = new RegExp('^"');
-                console.log(re);
+                console_log(re);
                 if(token.search(re) != -1 && final == false){
                   string = string + " ";
                   final = true;
                 }
 
                 re = new RegExp('"$');
-                console.log(re);
+                console_log(re);
                 if(token.search(re) != -1 && final == false){
                   final = true;
                   string = string + " " + token.substring(0, token.length-1);
@@ -2088,10 +2193,10 @@ function data_segment_compiler(){
 
               string = string;*/
 
-              console.log(string);
+              console_log(string);
 
               for(var i = 0; i < string.length + 1; i++){
-                console.log(string.length);
+                console_log(string.length);
                 if((data_address % align) != 0 && i == 0 && align != 0){
                   while((data_address % align) != 0){
                     if(data_address % 4 == 0){
@@ -2155,7 +2260,7 @@ function data_segment_compiler(){
                 }
               }
 
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
 
               if(memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length < 4){
                 var num_iter = 4 - memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length;
@@ -2164,7 +2269,7 @@ function data_segment_compiler(){
                 }
               }
 
-              console.log("ascii_null_end Terminado");
+              console_log("ascii_null_end Terminado");
 
               if(nextToken == 1){
                 next_token();
@@ -2173,28 +2278,28 @@ function data_segment_compiler(){
 
               nextToken = 1;
 
-              console.log(token);
+              console_log(token);
 
               for(var z = 0; z < architecture.directives.length; z++){
                 if(token == architecture.directives[z].name || token == null || token.search(/\:$/) != -1){
                   isAscii = false;
                 }
               }
-              console.log(memory[memory_hash[0]]);
+              console_log(memory[memory_hash[0]]);
             }
 
             j=0;
 
             break;
           case "space":
-            console.log("space");
+            console_log("space");
 
             var string = "";
 
             next_token();
             token = get_token();
-            console.log(token);
-            console.log(label);
+            console_log(token);
+            console_log(label);
 
             if(token == null){
               ret.status = "error" ;
@@ -2273,7 +2378,7 @@ function data_segment_compiler(){
               }
             }
 
-            console.log(memory[memory_hash[0]]);
+            console_log(memory[memory_hash[0]]);
 
             if(memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length < 4){
               var num_iter = 4 - memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length;
@@ -2285,15 +2390,15 @@ function data_segment_compiler(){
             next_token();
             token = get_token();
 
-            console.log("space Terminado");
+            console_log("space Terminado");
 
             break;
           case "align":
-            console.log("align");
+            console_log("align");
 
             next_token();
             token = get_token();
-            console.log(token);
+            console_log(token);
 
             if(token == null){
               ret.status = "error" ;
@@ -2320,18 +2425,18 @@ function data_segment_compiler(){
 	                return ret;
             }
 
-            console.log(align);
+            console_log(align);
             align = Math.pow(2, parseInt(token));
-            console.log(align);
+            console_log(align);
 
             next_token();
             token = get_token();
 
-            console.log("align Terminado");
+            console_log("align Terminado");
 
             break;
           default:
-            console.log("Default");
+            console_log("Default");
             existsData = false;
             break;
         }
@@ -2341,7 +2446,7 @@ function data_segment_compiler(){
         //app._data.memory[memory_hash[0]] = memory[memory_hash[0]];
         return;
       }
-    
+
     }
   }
   //app._data.memory[memory_hash[0]] = memory[memory_hash[0]];
@@ -2376,7 +2481,7 @@ function data_compiler(value, size, dataLabel, DefValue){
     }
 
     if(data_address % 4 == 0){
-      console.log(DefValue);
+      console_log(DefValue);
       memory[memory_hash[0]].push({Address: data_address, Binary: [], Value: DefValue, DefValue: DefValue, reset: false});
 
       if(i == 0){
@@ -2394,7 +2499,7 @@ function data_compiler(value, size, dataLabel, DefValue){
     }
     else{
       if(value.length <= 4 && i == 0){
-        console.log(DefValue);
+        console_log(DefValue);
         memory[memory_hash[0]][memory[memory_hash[0]].length-1].Value = DefValue + " " + memory[memory_hash[0]][memory[memory_hash[0]].length-1].Value;
         memory[memory_hash[0]][memory[memory_hash[0]].length-1].DefValue = DefValue + " " + memory[memory_hash[0]][memory[memory_hash[0]].length-1].DefValue;
       }
@@ -2408,18 +2513,18 @@ function data_compiler(value, size, dataLabel, DefValue){
       }
       else{
         (memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary).splice(data_address%4, 1, {Addr: (data_address), DefBin: value.substring(value.length-(2+(2*i)), value.length-(2*i)), Bin: value.substring(value.length-(2+(2*i)), value.length-(2*i)), Tag: null},);
-        console.log(memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary[data_address%4]);
+        console_log(memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary[data_address%4]);
       }
       data_address++;
     }
   }
-  console.log(memory[memory_hash[0]])
+  console_log(memory[memory_hash[0]])
 
   if(memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length < 4){
     var num_iter = 4 - memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary.length;
     for(var i = 0; i < num_iter; i++){
       (memory[memory_hash[0]][memory[memory_hash[0]].length-1].Binary).push({Addr: (data_address + i), DefBin: "00", Bin: "00", Tag: null},);
-      console.log("padding");
+      console_log("padding");
     }
   }
 }
@@ -2435,13 +2540,13 @@ function code_segment_compiler(){
 
     for(var i = 0; i < architecture.directives.length; i++){
       if(token == architecture.directives[i].name && architecture.directives[i].action == "global_symbol"){
-        next_token(); // .globl *main* 
-        next_token(); 
+        next_token(); // .globl *main*
+        next_token();
         token = get_token();
       }
       else if(token == architecture.directives[i].name){
         //app._data.instructions = instructions;
-        console.log(token);
+        console_log(token);
         for(var i = 0; i < instructions.length; i++){
           if(instructions[i].Label != ""){
             instructions_tag.push({tag: instructions[i].Label, addr: parseInt(instructions[i].Address, 16)});
@@ -2459,7 +2564,7 @@ function code_segment_compiler(){
       break;
     }
 
-    console.log(token);
+    console_log(token);
 
     var found = false;
     var end = false;
@@ -2492,7 +2597,7 @@ function code_segment_compiler(){
 					        ret.token = token.substring(0,token.length-1);
 					        ret.tokenIndex = tokenIndex;
 	                return ret;
-        } 
+        }
       }
 
       label = token.substring(0,token.length-1);
@@ -2521,10 +2626,10 @@ function code_segment_compiler(){
 
     if(token != null){
       token = token.replace(re, "");
-      console.log(token)
+      console_log(token)
       var stopFor = false;
     }
-    
+
 
     for(var i = 0; i < architecture.instructions.length && stopFor == false && end == false; i++){
       if(architecture.instructions[i].name != token){
@@ -2543,7 +2648,7 @@ function code_segment_compiler(){
             numFields++;
           }
         }
-        console.log(numFields);
+        console_log(numFields);
 
         instruction = instruction + token;
         userInstruction = userInstruction + token;
@@ -2553,7 +2658,7 @@ function code_segment_compiler(){
         for (var j = 0; j < numFields - 1; j++){
           next_token();
           token = get_token();
-          console.log(token);
+          console_log(token);
 
           if(token != null){
             var re = new RegExp(",+$");
@@ -2569,15 +2674,15 @@ function code_segment_compiler(){
             }*/
             instruction = instruction + " " + token;
             userInstruction = userInstruction + " " + token;
-          }  
+          }
 
           /*if(new_ins == 1){
             break;
           }*/
         }
 
-        console.log(instruction);
-        console.log(label);
+        console_log(instruction);
+        console_log(label);
 
         var result = instruction_compiler(instruction, userInstruction, label, tokenIndex, false, 0, instInit, i, false);
 
@@ -2603,12 +2708,12 @@ function code_segment_compiler(){
       var exists = false;
       var inst = token;
 
-      console.log(token)
+      console_log(token)
 
       for (var i = 0; i < architecture.pseudoinstructions.length && exists == false; i++){
         if(architecture.pseudoinstructions[i].name == token){
           numToken = architecture.pseudoinstructions[i].fields.length;
-          console.log(numToken)
+          console_log(numToken)
           exists = true;
           instruction = instruction + token;
 
@@ -2624,7 +2729,7 @@ function code_segment_compiler(){
             instruction = instruction + " " + token;
           }
           resultPseudo = pseudoinstruction_compiler(instruction, label, tokenIndex);
-          console.log(resultPseudo);
+          console_log(resultPseudo);
         }
       }
 
@@ -2648,7 +2753,7 @@ function code_segment_compiler(){
 				ret.status = "error" ;
         ret.errorcode = 2;
         ret.token = token;
-        ret.tokenIndex = tokenIndex;     
+        ret.tokenIndex = tokenIndex;
 
         return ret;
       }
@@ -2695,7 +2800,7 @@ function code_segment_compiler(){
         ret.status = "error" ;
         ret.errorcode = 25;
         ret.token = "";
-        ret.tokenIndex = tokenIndex;     
+        ret.tokenIndex = tokenIndex;
 
         return ret;
       }
@@ -2707,7 +2812,7 @@ function code_segment_compiler(){
   }
 
   token = get_token();
-  console.log(token);
+  console_log(token);
 
   //app._data.instructions = instructions;
 
@@ -2725,27 +2830,27 @@ function pseudoinstruction_compiler(instruction, label, line){
   instruction = instruction.replace(re, "'\0'");
   var re = /\'\\n\'/;
   instruction = instruction.replace(re, "10");
-  console.log(instruction);
+  console_log(instruction);
   var re = /\'\\t\'/;
   instruction = instruction.replace(re, "9");
-  console.log(instruction);
+  console_log(instruction);
 
   var instructionParts = instruction.split(' ');
   var found = false;
 
   var re = /\'\0\'/;
   instruction = instruction.replace(re, "' '");
-  console.log(instruction);
+  console_log(instruction);
 
 
   for (var i = 0; i < instructionParts.length; i++) {
     instructionParts[i] = instructionParts[i].replace(re, "' '");
   }
 
-  console.log(instructionParts);
+  console_log(instructionParts);
 
   for (var i = 0; i < architecture.pseudoinstructions.length; i++){
-    console.log(architecture.pseudoinstructions[i].name);
+    console_log(architecture.pseudoinstructions[i].name);
     if(architecture.pseudoinstructions[i].name != instructionParts[0]){
       continue;
     }
@@ -2763,16 +2868,16 @@ function pseudoinstruction_compiler(instruction, label, line){
       var signatureRawParts = architecture.pseudoinstructions[i].signatureRaw.split(' ');
       var definition = architecture.pseudoinstructions[i].definition;
 
-      console.log(signatureDef);
-      console.log(instruction);
-      console.log(instructionParts);
+      console_log(signatureDef);
+      console_log(instruction);
+      console_log(instructionParts);
 
       if(instructionParts.length < (architecture.pseudoinstructions[i].fields.length + 1)){
         for (var j = 0; j < ((architecture.pseudoinstructions[i].fields.length + 1)-instructionParts.length ); j++){
           next_token();
           token = get_token();
 
-          console.log(token);
+          console_log(token);
 
           if(token != null){
             var re = new RegExp(",+$");
@@ -2785,10 +2890,10 @@ function pseudoinstruction_compiler(instruction, label, line){
         instructionParts = instruction.split(' ');
       }
 
-      console.log(instruction);
+      console_log(instruction);
 
       re = new RegExp(signatureDef+"$");
-      console.log(re)
+      console_log(re)
       if(instruction.search(re) == -1 && i == architecture.pseudoinstructions.length-1){
         return -1;
       }
@@ -2801,31 +2906,31 @@ function pseudoinstruction_compiler(instruction, label, line){
         re = /aliasDouble\((.*)\)/;
         for(var a = 0; a < architecture.pseudoinstructions[i].fields.length && definition.search(re) != -1; a++){
           re = new RegExp(architecture.pseudoinstructions[i].fields[a].name,"g");
-          console.log(instructionParts[a+1]);
+          console_log(instructionParts[a+1]);
           instructionParts[a+1] = instructionParts[a+1].replace("$","");
           definition = definition.replace(re, instructionParts[a+1]);
         }
 
         /*Replace DFP of SPF*/
         re = /aliasDouble\((.*)\)/;
-        console.log(re);
+        console_log(re);
         while (definition.search(re) != -1){
           var match = re.exec(definition);
           var args = match[1].split(";");
           var aux = "";
 
           for(var b = 0; b < architecture.components[3].elements.length; b++){
-            console.log(architecture.components[3].elements[b].name); 
+            console_log(architecture.components[3].elements[b].name);
             if(architecture.components[3].elements[b].name == args[0]){
               aux = architecture.components[3].elements[b].simple_reg[args[1]];
-              console.log(aux);
+              console_log(aux);
               break;
             }
           }
-          console.log(aux);
+          console_log(aux);
 
           definition = definition.replace(re, aux);
-          console.log(definition);
+          console_log(definition);
 
         }
 
@@ -2838,28 +2943,28 @@ function pseudoinstruction_compiler(instruction, label, line){
         re = new RegExp("\n","g");
         definition = definition.replace(re, "");
 
-        console.log(definition);
-        console.log(signatureParts);
+        console_log(definition);
+        console_log(signatureParts);
 
         re = /Field.(\d).\((.*?)\).(.*?)[=<>;\s]/;
         while (definition.search(re) != -1){
           var match = re.exec(definition);
-          console.log(match);
+          console_log(match);
 
           var code;
 
           if(instructionParts[match[1]].match(/^\'(.*?)\'$/)){
             var re = /^\'(.*?)\'$/;
-            console.log(re);
+            console_log(re);
             var match2 = re.exec(instructionParts[match[1]]);
-            console.log(match2);
+            console_log(match2);
             var asciiCode = match2[1].charCodeAt(0);
-            console.log(asciiCode);
-            console.log("value = field('" + asciiCode +"', '(" + match[2] + ")', '" + match[3] + "')");
+            console_log(asciiCode);
+            console_log("value = field('" + asciiCode +"', '(" + match[2] + ")', '" + match[3] + "')");
             code = "value = field('" + asciiCode +"', '(" + match[2] + ")', '" + match[3] + "')";
           }
           else{
-            console.log("value = field('" + instructionParts[match[1]] +"', '(" + match[2] + ")', '" + match[3] + "')");
+            console_log("value = field('" + instructionParts[match[1]] +"', '(" + match[2] + ")', '" + match[3] + "')");
             code = "value = field('" + instructionParts[match[1]] +"', '(" + match[2] + ")', '" + match[3] + "')";
           }
 
@@ -2879,7 +2984,7 @@ function pseudoinstruction_compiler(instruction, label, line){
           }
 
           definition = definition.replace("Field." + match[1] + ".(" + match[2]+ ")." + match[3], value);
-          
+
           re = /Field.(\d).\((.*?)\).(.*?)[;\s]/;
         }
 
@@ -2887,22 +2992,22 @@ function pseudoinstruction_compiler(instruction, label, line){
         re = /Field.(\d).SIZE[=<>;\s]/g;
         if (definition.search(re) != -1){
           var match = re.exec(definition);
-          console.log(match);
+          console_log(match);
 
           var code;
 
           if(instructionParts[match[1]].match(/^\'(.*?)\'$/)){
             var re = /^\'(.*?)\'$/;
-            console.log(re);
+            console_log(re);
             var match2 = re.exec(instructionParts[match[1]]);
-            console.log(match2);
+            console_log(match2);
             var asciiCode = match2[1].charCodeAt(0);
-            console.log(asciiCode);
-            console.log("value = field('" + asciiCode +"', 'SIZE', null)");
+            console_log(asciiCode);
+            console_log("value = field('" + asciiCode +"', 'SIZE', null)");
             code = "value = field('" + asciiCode +"', 'SIZE', null)";
           }
           else{
-            console.log("value = field('" + instructionParts[match[1]] +"', 'SIZE', null)");
+            console_log("value = field('" + instructionParts[match[1]] +"', 'SIZE', null)");
             code = "value = field('" + instructionParts[match[1]] +"', 'SIZE', null)";
           }
 
@@ -2921,30 +3026,30 @@ function pseudoinstruction_compiler(instruction, label, line){
             return -1;
           }
 
-          console.log(value);
-          console.log("Field." + match[1] + ".SIZE");
+          console_log(value);
+          console_log("Field." + match[1] + ".SIZE");
 
           definition = definition.replace("Field." + match[1] + ".SIZE", value);
         }
 
-        console.log(definition);
+        console_log(definition);
 
         while(definition.match(/\'(.*?)\'/)){
           var re = /\'(.*?)\'/;
-          console.log(re);
+          console_log(re);
           var match2 = re.exec(instructionParts[match[1]]);
-          console.log(match2);
+          console_log(match2);
           var asciiCode = match2[1].charCodeAt(0);
-          console.log(asciiCode);
+          console_log(asciiCode);
           definition = definition.replace(re, asciiCode)
         }
 
-        console.log(definition);
+        console_log(definition);
 
-        console.log(instruction);
+        console_log(instruction);
         var re = new RegExp("'","g");
         instruction = instruction.replace(re, '"');
-        console.log(instruction);
+        console_log(instruction);
 
         var re = /{([^}]*)}/g;
         var code = re.exec(definition);
@@ -2952,7 +3057,7 @@ function pseudoinstruction_compiler(instruction, label, line){
         if(code != null){
           while(code != null){
             var instructions = code[1].split(";");
-            console.log(instructions);
+            console_log(instructions);
 
             for (var j = 0; j < instructions.length-1; j++){
               var aux;
@@ -2982,22 +3087,22 @@ function pseudoinstruction_compiler(instruction, label, line){
           }
         }
 
-        console.log(definition);
+        console_log(definition);
 
         try{
           var error = false;
-          console.log(definition);
+          console_log(definition);
           eval(definition);
           if(error == true){
-            console.log("Error pseudo");
+            console_log("Error pseudo");
             return -2;
           }
-          console.log("fin pseudo");
+          console_log("fin pseudo");
           return 0;
         }
         catch(e){
           if (e instanceof SyntaxError) {
-            console.log("ASDFGHJ")
+            console_log("ASDFGHJ")
             return -2;
           }
         }
@@ -3012,12 +3117,12 @@ function pseudoinstruction_compiler(instruction, label, line){
 }
 /*Get pseudoinstruction fields*/
 function field(field, action, type){
-  console.log(field);
-  console.log(action);
-  console.log(type);
-  
+  console_log(field);
+  console_log(action);
+  console_log(type);
+
   if(action == "SIZE"){
-    console.log("SIZE");
+    console_log("SIZE");
 
     if(field.match(/^0x/)){
       var value = field.split("x");
@@ -3062,7 +3167,7 @@ function field(field, action, type){
     }
     else if (type == "float"){
       var binNum = float2bin(parseFloat(field));
-      console.log(binNum);
+      console_log(binNum);
       binNum = binNum.padStart(32, '0');
       binNum = binNum.substring(31-startBit, 32-endBit);
       var hexNum = "0x" + bin2hex(binNum);
@@ -3070,7 +3175,7 @@ function field(field, action, type){
     }
     else if (type == "double"){
       var binNum = double2bin(parseFloat(field));
-      console.log(binNum);
+      console_log(binNum);
       binNum = binNum.padStart(64, '0');
       binNum = binNum.substring(63-startBit, 64-endBit);
       var hexNum = "0x" + bin2hex(binNum);
@@ -3085,8 +3190,8 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
   if(instIndex == null){
     instIndex = 0;
   }
-  console.log(instruction);
-  console.log(instIndex);
+  console_log(instruction);
+  console_log(instIndex);
   var re = new RegExp("^ +");
   var oriInstruction = instruction.replace(re, "");
 
@@ -3099,8 +3204,8 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
   var stopBit;
   var resultPseudo = -3;
 
-  console.log(label);
-  console.log(line);
+  console_log(label);
+  console_log(line);
 
   var stopFor = false;
 
@@ -3140,19 +3245,19 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
         signatureRawParts.push(match[j]);
       }
 
-      console.log(signatureParts);
-      console.log(signatureRawParts);
+      console_log(signatureParts);
+      console_log(signatureRawParts);
 
       re = new RegExp(signatureDef+"$");
       if(oriInstruction.search(re) == -1){
 
         if(isPseudo == false){
-          console.log(get_token())
+          console_log(get_token())
 
           tokenIndex =  instInit;
           token = get_token();
 
-          console.log(token);
+          console_log(token);
         }
         else{
           token = instructionParts[0];
@@ -3162,7 +3267,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
         var instruction = "";
         var numToken = 0;
 
-        console.log(token)
+        console_log(token)
 
         for(var i = i + 1; i < architecture.instructions.length; i++){
           if(architecture.instructions[i].name == token){
@@ -3187,7 +3292,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                 }
 
                 instruction = instruction + " " + token;
-                console.log(instruction);
+                console_log(instruction);
               }
             }
             if(isPseudo == false){
@@ -3199,7 +3304,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             return;
           }
         }
-        
+
 
 
 
@@ -3220,10 +3325,10 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
 
               instruction = instruction + " " + token;
             }
-            console.log(instruction)
+            console_log(instruction)
             resultPseudo = pseudoinstruction_compiler(instruction, label, tokenIndex);
-          
-            console.log(resultPseudo)
+
+            console_log(resultPseudo)
 
             if(resultPseudo == 0){
               return;
@@ -3234,7 +3339,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
               ret.status = "error" ;
 			        ret.errorcode = 3;
 			        ret.token = auxSignature;
-			        ret.tokenIndex = tokenIndex;     
+			        ret.tokenIndex = tokenIndex;
 
 			        return ret;
             }
@@ -3243,7 +3348,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
 
         //var resultPseudo = pseudoinstruction_compiler(oriInstruction, label, textarea_assembly_editor.posFromIndex(tokenIndex).line);
 
-        /*console.log(resultPseudo)
+        /*console_log(resultPseudo)
 
         if(resultPseudo == 0){
           return;
@@ -3259,11 +3364,11 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
       	ret.status = "error" ;
         ret.errorcode = 3;
         ret.token = auxSignature;
-        ret.tokenIndex = tokenIndex;     
+        ret.tokenIndex = tokenIndex;
 
         return ret;
       }
-      console.log(oriInstruction);
+      console_log(oriInstruction);
       match = re.exec(oriInstruction);
       instructionParts = [];
       if(match != null){
@@ -3274,8 +3379,8 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
       else{
         return -2;
       }
-      
-      console.log(instructionParts);
+
+      console_log(instructionParts);
 
       //PRUEBA
       re = new RegExp("[fF][0-9]+");
@@ -3288,12 +3393,12 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
 
 
       for(var j = 0; j < signatureParts.length; j++){
-        console.log(signatureParts[j]);
+        console_log(signatureParts[j]);
         switch(signatureParts[j]) {
           case "INT-Reg":
             token = instructionParts[j];
 
-            console.log(token);
+            console_log(token);
 
             var id = -1;
             re = new RegExp("[0-9]+");
@@ -3321,21 +3426,21 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       	ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
 
-                      console.log(reg)
-                      console.log((reg.toString(2)).padStart(fieldsLength, "0"))
-                      console.log(binary)
-                      console.log(binary.length)
-                      console.log(architecture.instructions[i].fields[a].startbit + 1)
-                      console.log(binary.length - (architecture.instructions[i].fields[a].startbit + 1))
+                      console_log(reg)
+                      console_log((reg.toString(2)).padStart(fieldsLength, "0"))
+                      console_log(binary)
+                      console_log(binary.length)
+                      console_log(architecture.instructions[i].fields[a].startbit + 1)
+                      console_log(binary.length - (architecture.instructions[i].fields[a].startbit + 1))
 
                       binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + (reg.toString(2)).padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
-                      
-                      console.log(binary);
+
+                      console_log(binary);
 
                       //re = RegExp("[fF][0-9]+");
                       re = RegExp("Field[0-9]+");
@@ -3351,7 +3456,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3365,7 +3470,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3380,7 +3485,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
           case "SFP-Reg":
             token = instructionParts[j];
 
-            console.log(token);
+            console_log(token);
 
             var validReg = false;
             var regNum = 0;
@@ -3400,7 +3505,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3408,15 +3513,15 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + (reg.toString(2)).padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
                       //re = RegExp("[fF][0-9]+");
                       re = RegExp("Field[0-9]+");
-                      console.log(instruction);
+                      console_log(instruction);
                       instruction = instruction.replace(re, token);
-                      console.log(instruction);
+                      console_log(instruction);
                     }
                     else if(z == architecture_hash.length-1 && w == architecture.components[z].elements.length-1 && validReg == false){
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3433,7 +3538,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
           case "DFP-Reg":
             token = instructionParts[j];
 
-            console.log(token);
+            console_log(token);
 
             var validReg = false;
             var regNum = 0;
@@ -3453,7 +3558,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3467,7 +3572,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3484,7 +3589,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
           case "Ctrl-Reg":
             token = instructionParts[j];
 
-            console.log(token)
+            console_log(token)
 
             var validReg = false;
             var regNum = 0;
@@ -3504,7 +3609,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                         ret.status = "error" ;
 								        ret.errorcode = 12;
 								        ret.token = token;
-								        ret.tokenIndex = tokenIndex;     
+								        ret.tokenIndex = tokenIndex;
 
 								        return ret;
                       }
@@ -3518,7 +3623,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 4;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3536,12 +3641,12 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             token = instructionParts[j];
             var token_user = "";
 
-            console.log(token);
+            console_log(token);
 
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-            
+
                 var inm;
 
                 if(token.match(/^0x/)){
@@ -3549,13 +3654,13 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   if(value[1].length*4 > fieldsLength){
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3564,7 +3669,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3575,7 +3680,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3586,13 +3691,13 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   if(float2bin(parseFloat(token)).length > fieldsLength){
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3601,7 +3706,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3611,7 +3716,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3620,11 +3725,11 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                 }
                 else if(token.match(/^\'(.*?)\'$/)){
                   var re = /^\'(.*?)\'$/;
-                  console.log(re);
+                  console_log(re);
                   var match = re.exec(token);
-                  console.log(match);
+                  console_log(match);
                   var asciiCode = match[1].charCodeAt(0);
-                  console.log(asciiCode);
+                  console_log(asciiCode);
 
                   re = RegExp("Field[0-9]+");
                   instruction = instruction.replace(re, asciiCode);
@@ -3640,18 +3745,18 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   var numAux = parseInt(token, 10) >>> 0;
 
                   if((numAux.toString(2)).length > fieldsLength){
-                    console.log(oriInstruction)
-                    console.log(label)
-                    console.log(line)
+                    console_log(oriInstruction)
+                    console_log(label)
+                    console_log(line)
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3660,7 +3765,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3670,7 +3775,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3678,19 +3783,19 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   inm = (parseInt(token, 10) >>> 0).toString(2);
                 }
                 if(validTagPC == true){
-                  console.log(inm.length);
+                  console_log(inm.length);
                   if(inm.length > (architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1)){
                     ret.status = "error" ;
 						        ret.errorcode = 12;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
 
                   binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + inm.padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
                 }
-                
+
                 //re = RegExp("[fF][0-9]+");
                 re = RegExp("Field[0-9]+");
                 instruction = instruction.replace(re, token);
@@ -3702,7 +3807,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
           case "address":
             token = instructionParts[j];
 
-            console.log(token)
+            console_log(token)
 
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
@@ -3715,7 +3820,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 8;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3724,7 +3829,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 9;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3749,12 +3854,12 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             token = instructionParts[j];
             var token_user = "";
 
-            console.log(token);
+            console_log(token);
 
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-            
+
                 var inm;
 
                 if(token.match(/^0x/)){
@@ -3762,13 +3867,13 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   if(value[1].length*4 > fieldsLength){
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3777,7 +3882,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3788,7 +3893,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 							        ret.errorcode = 6;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                   }
@@ -3799,13 +3904,13 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   if(float2bin(parseFloat(token)).length > fieldsLength){
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3814,7 +3919,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3824,7 +3929,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3840,18 +3945,18 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   var numAux = parseInt(token, 10) >>> 0;
 
                   if((numAux.toString(2)).length > fieldsLength){
-                    console.log(oriInstruction)
-                    console.log(label)
-                    console.log(line)
+                    console_log(oriInstruction)
+                    console_log(label)
+                    console_log(line)
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3860,7 +3965,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3870,7 +3975,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3882,19 +3987,19 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 12;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
 
                   binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + inm.padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
                 }
-                
+
                 //re = RegExp("[fF][0-9]+");
                 re = RegExp("Field[0-9]+");
-                console.log(instruction);
+                console_log(instruction);
                 instruction = instruction.replace(re, token);
-                console.log(instruction);
+                console_log(instruction);
               }
             }
 
@@ -3904,12 +4009,12 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
             token = instructionParts[j];
             var token_user = "";
 
-            console.log(token);
+            console_log(token);
 
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-            
+
                 var inm;
 
                 if(token.match(/^0x/)){
@@ -3917,13 +4022,13 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   if(value[1].length*4 > fieldsLength){
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3932,7 +4037,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3943,7 +4048,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3954,13 +4059,13 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   if(float2bin(parseFloat(token)).length > fieldsLength){
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3969,7 +4074,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -3979,7 +4084,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -3995,18 +4100,18 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                   var numAux = parseInt(token, 10) >>> 0;
 
                   if((numAux.toString(2)).length > fieldsLength){
-                    console.log(oriInstruction)
-                    console.log(label)
-                    console.log(line)
+                    console_log(oriInstruction)
+                    console_log(label)
+                    console_log(line)
                     resultPseudo = pseudoinstruction_compiler(oriInstruction, label, line);
 
-                    console.log(resultPseudo);
+                    console_log(resultPseudo);
 
                     if(resultPseudo == -1){
                       ret.status = "error" ;
 							        ret.errorcode = 5;
 							        ret.token = token;
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -4015,7 +4120,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                       ret.status = "error" ;
 							        ret.errorcode = 14;
 							        ret.token = "";
-							        ret.tokenIndex = tokenIndex;     
+							        ret.tokenIndex = tokenIndex;
 
 							        return ret;
                     }
@@ -4025,7 +4130,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 6;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
@@ -4037,19 +4142,19 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
                     ret.status = "error" ;
 						        ret.errorcode = 12;
 						        ret.token = token;
-						        ret.tokenIndex = tokenIndex;     
+						        ret.tokenIndex = tokenIndex;
 
 						        return ret;
                   }
 
                   binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + inm.padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit ), binary.length);
                 }
-                
+
                 //re = RegExp("[fF][0-9]+");
                 re = RegExp("Field[0-9]+");
-                console.log(instruction);
+                console_log(instruction);
                 instruction = instruction.replace(re, token);
-                console.log(instruction);
+                console_log(instruction);
               }
             }
 
@@ -4058,24 +4163,24 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
           default:
             token = instructionParts[j];
 
-            console.log(token);
+            console_log(token);
 
             for(var a = 0; a < architecture.instructions[i].fields.length; a++){
-              console.log(architecture.instructions[i].fields[a].name);
+              console_log(architecture.instructions[i].fields[a].name);
               if(architecture.instructions[i].fields[a].name == signatureRawParts[j]){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
-                
-                console.log((architecture.instructions[i].co).padStart(fieldsLength, "0"));
+
+                console_log((architecture.instructions[i].co).padStart(fieldsLength, "0"));
 
                 binary = binary.substring(0, binary.length - (architecture.instructions[i].fields[a].startbit + 1)) + (architecture.instructions[i].co).padStart(fieldsLength, "0") + binary.substring(binary.length - (architecture.instructions[i].fields[a].stopbit), binary.length);
-                
-                console.log(binary);
+
+                console_log(binary);
 
                 //re = RegExp("[fF][0-9]+");
                 re = RegExp("Field[0-9]+");
-                console.log(instruction);
+                console_log(instruction);
                 instruction = instruction.replace(re, token);
-                console.log(instruction);
+                console_log(instruction);
               }
               if(architecture.instructions[i].fields[a].type == "cop"){
                 fieldsLength = architecture.instructions[i].fields[a].startbit - architecture.instructions[i].fields[a].stopbit + 1;
@@ -4089,7 +4194,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
       }
 
       if(validTagPC == false && resultPseudo == -3){
-        console.log("pendiente");
+        console_log("pendiente");
 
         var padding = "";
         padding = padding.padStart((architecture.instructions[i].nwords*32)-(binary.length), "0");
@@ -4098,8 +4203,8 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
         var hex = bin2hex(binary);
         var auxAddr = address;
 
-        console.log(binary);
-        console.log(bin2hex(binary));
+        console_log(binary);
+        console_log(bin2hex(binary));
 
         pending_instructions.push({address: address, instruction: instruction, signature: signatureParts, signatureRaw: signatureRawParts, Label: label, binary: binary, startBit: startBit, stopBit: stopBit, visible: true, line: tokenIndex});
 
@@ -4121,8 +4226,8 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
           }
         }
 
-        console.log(address.toString(16));
-        console.log(instructions);
+        console_log(address.toString(16));
+        console_log(instructions);
 
         stopFor = true;
         break;
@@ -4130,7 +4235,7 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
 
       else{
         if(resultPseudo == -3){
-          console.log("no pendiente")
+          console_log("no pendiente")
 
           var padding = "";
           padding = padding.padStart((architecture.instructions[i].nwords*32)-(binary.length), "0");
@@ -4139,8 +4244,8 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
           var hex = bin2hex(binary);
           var auxAddr = address;
 
-          console.log(binary);
-          console.log(bin2hex(binary));
+          console_log(binary);
+          console_log(bin2hex(binary));
 
           if(pending == false){
             instructions.push({ Break: null, Address: "0x" + address.toString(16), Label: label , loaded: instruction, user: userInstruction, _rowVariant: '', visible: true, hide: false});
@@ -4162,8 +4267,8 @@ function instruction_compiler(instruction, userInstruction, label, line, pending
 
           stopFor = true;
 
-          console.log(address.toString(16));
-          console.log(instructions);
+          console_log(address.toString(16));
+          console_log(instructions);
         }
       }
     }
@@ -4291,14 +4396,14 @@ function bin2hex(s) {
     part = s.substr(i+1-4, 4);
     accum = 0;
     for (k = 0; k < 4; k += 1){
-      if (part[k] !== '0' && part[k] !== '1'){     
+      if (part[k] !== '0' && part[k] !== '1'){
           return { valid: false };
       }
       accum = accum * 2 + parseInt(part[k], 10);
     }
     if (accum >= 10){
       ret = String.fromCharCode(accum - 10 + 'A'.charCodeAt(0)) + ret;
-    } 
+    }
     else {
       ret = String(accum) + ret;
     }
@@ -4325,7 +4430,7 @@ function binaryStringToInt( b ) {
 /*Reset execution*/
 function reset(){
   executionIndex = 0;
-  
+
   /*Reset stats*/
   totalStats=0;
   for (var i = 0; i < stats.length; i++){
@@ -4420,6 +4525,7 @@ function bigInt_serialize(object){
   }
   return auxObject;
 }
+
 /*String to Bigint number*/
 function bigInt_deserialize(object){
   var auxObject = object;
@@ -4441,6 +4547,32 @@ function bigInt_deserialize(object){
   }
   return auxObject;
 }
+
+
+/*
+ * Creator UI
+ */
+
+      function show_notification ( msg, type )
+      {
+          $(".loading").hide();
+          app._data.alertMessage = msg ;
+          app._data.type = type ;
+          app.$bvToast.toast(app._data.alertMessage, {
+            variant: app._data.type,
+            solid: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 1500,
+          });
+
+          var date = new Date();
+          notifications.push({ mess: app._data.alertMessage, 
+                               color: app._data.type, 
+                               time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), 
+                               date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear() }); 
+      }
+
+
 function assembly_compile ( code )
 {
 	var ret = {} ;
@@ -4458,15 +4590,23 @@ function assembly_compile ( code )
 
 function load_architecture ( arch_str )
 {
-	var ret = {} ;
+    var ret = {} ;
 
-    bigInt = BigInt ;
-	arch_obj = JSON.parse(arch_str) ;
+    if (typeof bigInt === "undefined") {
+        bigInt = BigInt ;
+    }
+
+    arch_obj = JSON.parse(arch_str) ;
     ret = load_arch_select(arch_obj) ;
 
-	return ret ;
+    return ret ;
 }
 
 
+//
+// Module interface
+//
+
 module.exports.load_architecture = load_architecture ;
 module.exports.assembly_compile = assembly_compile ;
+
