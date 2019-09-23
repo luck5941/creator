@@ -1788,6 +1788,7 @@
           </div>
 
           <!-- Execution instruction -->
+	  <keep-alive>
           <div class="col-lg-7 col-sm-12">
             <div class="col-lg-12 col-sm-12 table-inst-wrapper-scroll-y ">
               <b-table striped small hover :items="instructions" :fields="archInstructions" class="instructions_table" @row-clicked="breakPoint" style="cursor: pointer;" :filter-function=filter filter=" ">
@@ -1819,6 +1820,7 @@
               </b-table>
             </div>
           </div>
+	  </keep-alive>
 
           <!-- Execution data -->
           <div class="col-lg-5 col-sm-12">
@@ -1844,6 +1846,7 @@
             </div>
 
             <!-- Registers view -->
+	    <keep-alive>
             <div class="col-lg-12 col-sm-12" id="registers">
               <b-tabs content-class="mt-3">
 
@@ -2187,8 +2190,10 @@
                 </b-tab>
               </b-tabs>
             </div>
+	    </keep-alive>
 
             <!-- Memory view-->
+	    <keep-alive>
             <div class="col-lg-12 col-sm-12" id="memory" style="display:none;">
               <b-tabs content-class="mt-3">
 
@@ -2267,6 +2272,7 @@
                 </b-tab>
               </b-tabs>
             </div>
+	    </keep-alive>
 
             <!-- Stats--->
             <div class="col-lg-12 col-sm-12" id="stats" style="display:none;">
