@@ -4549,30 +4549,6 @@ function bigInt_deserialize(object){
 }
 
 
-/*
- * Creator UI
- */
-
-      function show_notification ( msg, type )
-      {
-          $(".loading").hide();
-          app._data.alertMessage = msg ;
-          app._data.type = type ;
-          app.$bvToast.toast(app._data.alertMessage, {
-            variant: app._data.type,
-            solid: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 1500,
-          });
-
-          var date = new Date();
-          notifications.push({ mess: app._data.alertMessage, 
-                               color: app._data.type, 
-                               time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), 
-                               date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear() }); 
-      }
-
-
 function assembly_compile ( code )
 {
 	var ret = {} ;
