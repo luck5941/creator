@@ -408,6 +408,8 @@ try{
 
     /*Created vue instance*/
     created(){
+      //this.creator_mode = 'architecture';
+      this.creator_mode = 'simulator';
       this.load_arch_available();
       this.load_examples_available();
       this.detectNavigator();
@@ -586,6 +588,7 @@ try{
             $("#load_menu_arch").hide();
             $("#view_components").show();
             $(".loading").hide();
+            app._data.creator_mode = 'simulator';
 
             show_notification('The selected architecture has been loaded correctly', 'success') ;
             return;
@@ -618,6 +621,7 @@ try{
           $("#load_arch").hide();
           $("#load_menu_arch").hide();
           $("#view_components").show();
+          app._data.creator_mode = 'simulator';
 
           show_notification('The selected architecture has been loaded correctly', 'success') ;
         })
@@ -669,10 +673,12 @@ try{
           app._data.name_arch = '';
           app._data.description_arch = '';
           app._data.load_arch = '';
+          app._data.creator_mode = 'simulator';
 
           $(".loading").hide();
         }
       },
+
       /*Create a new architecture*/
       new_arch(){
         $("#architecture_menu").hide();
@@ -687,6 +693,7 @@ try{
         $("#view_components").show();
         $(".loading").hide();
       },
+
       /*Check if it is a new architecture*/
       default_arch(item){
         for (var i = 0; i < load_architectures_available.length; i++) {
