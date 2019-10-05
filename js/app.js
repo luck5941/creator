@@ -20,7 +20,6 @@
 
 
 
-
 /****************
  * Vue instance *
  ****************/
@@ -516,6 +515,7 @@ try{
 
         app._data.architecture = architecture;
         app._data.assembly_code = localStorage.getItem("assembly_copy");
+                  code_assembly = app._data.assembly_code ;
         //textarea_assembly_editor.setValue(localStorage.getItem("assembly_copy"));
 
         architecture_hash = [];
@@ -531,7 +531,7 @@ try{
 
         //$("#architecture_menu").hide();
         app.change_UI_mode('simulator');
-        app.change_data_view('registers' , 'int');
+        app.change_data_view('registers' , 'integer');
         app.$forceUpdate();
         /*$("#save_btn_arch").show();
         $("#advanced_mode").show();
@@ -577,7 +577,7 @@ try{
 
             //$("#architecture_menu").hide();
             app.change_UI_mode('simulator');
-            app.change_data_view('registers' , 'int');
+            app.change_data_view('registers' , 'integer');
             app.$forceUpdate();
             hide_loading();
 
@@ -604,7 +604,7 @@ try{
 
           //$("#architecture_menu").hide();
           app.change_UI_mode('simulator');
-          app.change_data_view('registers' , 'int');
+          app.change_data_view('registers' , 'integer');
           app.$forceUpdate();
           hide_loading();
 
@@ -667,7 +667,7 @@ try{
       new_arch(){
         //$("#architecture_menu").hide();
         app.change_UI_mode('simulator');
-        app.change_data_view('registers' , 'int');
+        app.change_data_view('registers' , 'integer');
         app.$forceUpdate();
         hide_loading();
       },
@@ -1071,16 +1071,16 @@ try{
             for (var a = 0; a < architecture_hash.length; a++){
               for (var b = 0; b < architecture.components[a].elements.length; b++) {
                 if(architecture.components[a].elements[b].name == this.formArchitecture.simple1){
-                  aux_sim1 = this.bin2hex(this.float2bin(architecture.components[a].elements[b].default_value));
+                  aux_sim1 = bin2hex(float2bin(architecture.components[a].elements[b].default_value));
                 }
                 if(architecture.components[a].elements[b].name == this.formArchitecture.simple2){
-                  aux_sim2 = this.bin2hex(this.float2bin(architecture.components[a].elements[b].default_value));
+                  aux_sim2 = bin2hex(float2bin(architecture.components[a].elements[b].default_value));
                 }
               }
             }
 
             aux_value = aux_sim1 + aux_sim2;
-            aux_new = this.hex2double("0x" + aux_value);
+            aux_new = hex2double("0x" + aux_value);
 
             var newElement = {name:this.formArchitecture.name, nbits: this.number_bits*2, value: aux_new, properties: this.formArchitecture.properties};
             architecture.components[i].elements.push(newElement);
@@ -1176,17 +1176,17 @@ try{
                   for (var a = 0; a < architecture_hash.length; a++) {
                     for (var b = 0; b < architecture.components[a].elements.length; b++) {
                       if(architecture.components[a].elements[b].name == this.formArchitecture.simple1){
-                        aux_sim1 = this.bin2hex(this.float2bin(architecture.components[a].elements[b].value));
+                        aux_sim1 = bin2hex(float2bin(architecture.components[a].elements[b].value));
                       }
                       if(architecture.components[a].elements[b].name == this.formArchitecture.simple2){
-                        aux_sim2 = this.bin2hex(this.float2bin(architecture.components[a].elements[b].value));
+                        aux_sim2 = bin2hex(float2bin(architecture.components[a].elements[b].value));
                       }
                     }
                   }
 
                   aux_value = aux_sim1 + aux_sim2;
 
-                  architecture.components[i].elements[j].value = this.hex2double("0x" + aux_value);
+                  architecture.components[i].elements[j].value = hex2double("0x" + aux_value);
 
                   architecture.components[i].elements[j].simple_reg[0] = this.formArchitecture.simple1;
                   architecture.components[i].elements[j].simple_reg[1] = this.formArchitecture.simple2;
@@ -2019,7 +2019,7 @@ try{
                           return -1;
                         }
 
-                        if(this.float2bin(parseFloat(instructionParts[z])).length > fieldsLength){
+                        if(float2bin(parseFloat(instructionParts[z])).length > fieldsLength){
                           show_notification("Immediate number " + instructionParts[z] + " is too big", 'danger') ;
                           return -1;
                         }
@@ -2206,7 +2206,7 @@ try{
                         return -1;
                       }
 
-                      if(this.float2bin(parseFloat(instructionParts[z])).length > fieldsLength){
+                      if(float2bin(parseFloat(instructionParts[z])).length > fieldsLength){
                         show_notification("Immediate number " + instructionParts[z] + " is too big", 'danger') ;
                         return -1;
                       }
@@ -2660,188 +2660,61 @@ try{
         $("#divTags").hide();
         this.load_binary = false;
       },
-      /*Places the pointer in the first position*/
-      first_token(){
-        var assembly = textarea_assembly_editor.getValue();
-        var index = tokenIndex;
 
-        while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r') || (assembly.charAt(index) == '#')) && (index < assembly.length)){
-          while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-            index++;
-          }
-
-          if(assembly.charAt(index) == '#'){
-            while((assembly.charAt(index) != '\n') && (index < assembly.length)){
-              index++;
-            }
-
-            while(((assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-              index++;
-            }
-          }
-        }
-
-        tokenIndex = index;
-      },
-      /*Read token*/
-      get_token(){
-        var assembly = textarea_assembly_editor.getValue();
-        var index = tokenIndex;
-
-        if(index >= assembly.length){
-          return null;
-        }
-
-        console_log(assembly.charAt(index));
-        console_log(index);
-
-        if(assembly.charAt(index) == "'"){
-          index++;
-          while(assembly.charAt(index) != "'" && index < assembly.length){
-            console_log(assembly.charAt(index));
-            console_log(index);
-            index++;
-          }
-          index++;
-
-          console_log(assembly.substring(tokenIndex, index));
-          console_log(index);
-          console_log(assembly.substring(tokenIndex, index));
-          return assembly.substring(tokenIndex, index);
-        }
-
-        if(assembly.charAt(index) == '"'){
-          index++;
-          while(assembly.charAt(index) != '"' && index < assembly.length){
-            console_log(assembly.charAt(index));
-            console_log(index);
-            index++;
-          }
-          index++;
-
-          console_log(assembly.substring(tokenIndex, index));
-          console_log(index);
-          console_log(assembly.substring(tokenIndex, index));
-          return assembly.substring(tokenIndex, index);
-        }
-
-
-
-        if((assembly.charAt(index) == '(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
-          index++;
-        }
-
-        while((assembly.charAt(index) != ',') && (assembly.charAt(index) != '(') && (assembly.charAt(index) != ')') && (assembly.charAt(index) != '[') && (assembly.charAt(index) != ']') && (assembly.charAt(index) != '{') && (assembly.charAt(index) != '}') && (assembly.charAt(index) != ':') && (assembly.charAt(index) != '#') && (assembly.charAt(index) != '\t') && (assembly.charAt(index) != '\n') && (assembly.charAt(index) != ' ') && (assembly.charAt(index) != '\r') && (index < assembly.length)){
-          index++;
-        }
-
-        var res;
-        if((assembly.charAt(index) == ':') || (assembly.charAt(index) == ')') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '}')){
-          res = assembly.substring(tokenIndex, index) + assembly.charAt(index);
-        }
-        else{
-          res = assembly.substring(tokenIndex, index);
-        }
-
-        return res;
-      },
-      /*Places the pointer in the start of next token*/
-      next_token(){
-        var assembly = textarea_assembly_editor.getValue();
-        var index = tokenIndex;
-
-        console_log(assembly.charAt(index));
-        if(assembly.charAt(index) == "'"){
-          index++;
-          while(assembly.charAt(index) != "'" && index < assembly.length){
-            console_log(assembly.charAt(index));
-            index++;
-          }
-          index++;
-        }
-
-        if(assembly.charAt(index) == '"'){
-          index++;
-          while(assembly.charAt(index) != '"' && index < assembly.length){
-            console_log(assembly.charAt(index));
-            index++;
-          }
-          index++;
-        }
-
-        if((assembly.charAt(index) == '(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
-          index++;
-        }
-
-        while((assembly.charAt(index) != ',') && (assembly.charAt(index) != '(') && (assembly.charAt(index) != ')') && (assembly.charAt(index) != '[') && (assembly.charAt(index) != ']') && (assembly.charAt(index) != '{') && (assembly.charAt(index) != '}') && (assembly.charAt(index) != ':') && (assembly.charAt(index) != '#') && (assembly.charAt(index) != '\t') && (assembly.charAt(index) != '\n') && (assembly.charAt(index) != ' ') && (assembly.charAt(index) != '\r') && (index < assembly.length)){
-          index++;
-        }
-
-        while(((assembly.charAt(index) == ',') || (assembly.charAt(index) == '(') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '{') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r') || (assembly.charAt(index) == '#')) && (index < assembly.length)){
-
-          while(((assembly.charAt(index) ==',') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-            index++;
-          }
-
-          if((assembly.charAt(index) =='(') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == '{')){
-            break;
-          }
-
-          if(assembly.charAt(index) == '#'){
-            while((assembly.charAt(index) != '\n') && (index < assembly.length)){
-              index++;
-            }
-
-            while(((assembly.charAt(index) == '(') || (assembly.charAt(index) ==')') || (assembly.charAt(index) == '[') || (assembly.charAt(index) == ']') || (assembly.charAt(index) == '{') || (assembly.charAt(index) == '}') || (assembly.charAt(index) == ':') || (assembly.charAt(index) == '\t') || (assembly.charAt(index) == '\n') || (assembly.charAt(index) == ' ') || (assembly.charAt(index) == '\r')) && (index < assembly.length)){
-              index++;
-            }
-          }
-        }
-        tokenIndex = index;
-      },
       /*Compile assembly code*/
-      assembly_compiler(){
-      	assembly = textarea_assembly_editor.getValue(); 
-
-        $(".loading").show();
+      assembly_compiler()
+      {
+        show_loading();
         promise = new Promise((resolve, reject) => {
-          setTimeout(function() {
-            var ret = assembly_compiler(assembly);
-            console.log(ret);
-            // ui updates
-            //if (ret.update == "memory") 
-            //{
-                app._data.memory[memory_hash[1]] = memory[memory_hash[1]];
-                app._data.memory[memory_hash[0]] = memory[memory_hash[0]];
-                app._data.memory[memory_hash[2]] = memory[memory_hash[2]];
-                app._data.instructions = instructions;
-            //}
 
-            $(".loading").hide();
+          setTimeout(function()
+	  {
+	    /* compile */
+            code_assembly = textarea_assembly_editor.getValue();
+            var ret = assembly_compiler() ;
+
+	    /* update */
+	    app._data.instructions = instructions;
+	    app._data.memory[memory_hash[1]] = memory[memory_hash[1]];
+	    app._data.memory[memory_hash[0]] = memory[memory_hash[0]];
+	    app._data.memory[memory_hash[2]] = memory[memory_hash[2]];
+            tokenIndex = 0;
+            app.reset();
+
+            /*Save a backup in the cache memory*/
+            if (typeof(Storage) !== "undefined") 
+            {
+              var auxObject = jQuery.extend(true, {}, architecture);
+              var auxArchitecture = bigInt_serialize(auxObject);
+              var auxArch = JSON.stringify(auxArchitecture, null, 2);
+
+              var date = new Date();
+              var auxDate = date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+" - "+date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
+              console_log(app._data.architecture_name);
+
+              localStorage.setItem("arch_name", app._data.architecture_name);
+              localStorage.setItem("architecture_copy", auxArch);
+              localStorage.setItem("assembly_copy", textarea_assembly_editor.getValue());
+              localStorage.setItem("date_copy", auxDate);
+            }
 
             // show error/warning
-            if (ret.status == "error") 
-            {
+            hide_loading();
+
+            if (ret.status == "error") {
                 app.compileError(ret.errorcode, ret.token, textarea_assembly_editor.posFromIndex(tokenIndex).line);
             }
-            if (ret.status == "warning") 
-            {
-                app._data.alertMessage = ret.token;
-                app._data.type = ret.type;
-                app.$bvToast.toast(app._data.alertMessage, {
-                  variant: app._data.type,
-                  solid: true,
-                  toaster: "b-toaster-top-center",
-                  autoHideDelay: 1500,
-                });
-                var date = new Date();
-                notifications.push({mess: app._data.alertMessage, color: app._data.type, time: date.getHours()+":"+date.getMinutes()+":"+date.getSeconds(), date: date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear()}); 
+	    else if (ret.status == "warning") {
+                show_notification(ret.token, ret.type) ;
+            }       
+	    else {
+                show_notification('Compilation completed successfully', 'success') ;
             }       
 
-            tokenIndex = 0;
-            // resolve promise
+            // end
             resolve("0");
-          }, 15);
+
+          }, 25);
         });
       },
 
@@ -2867,7 +2740,6 @@ try{
 
         this.modalAssemblyError.error = compileError[error].mess1 + token + compileError[error].mess2;
       },
-
 
 
       /*Simulator*/
@@ -2945,13 +2817,13 @@ try{
 
               float = this.hex2float("0x" + hex);
               console_log(this.hex2float("0x" + hex));
-              binary = this.float2bin(float).padStart(this.calculator.bits, "0");
+              binary = float2bin(float).padStart(this.calculator.bits, "0");
 
               this.calculator.decimal = float;
               this.calculator.sign = binary.substring(0, 1);
               this.calculator.exponent = binary.substring(1, 9);
               this.calculator.mantissa = binary.substring(9, 32);
-              this.calculator.exponentDec = parseInt(this.bin2hex(this.calculator.exponent), 16);
+              this.calculator.exponentDec = parseInt(bin2hex(this.calculator.exponent), 16);
               this.calculator.mantissaDec = 0;
 
               var j = 0;
@@ -2975,14 +2847,14 @@ try{
                 return;
               }
 
-              float = this.hex2double("0x"+hex);
-              binary = this.double2bin(float);
+              float = hex2double("0x"+hex);
+              binary = double2bin(float);
 
               this.calculator.decimal = float;
               this.calculator.sign = binary.substring(0, 1);
               this.calculator.exponent = binary.substring(1, 12);
               this.calculator.mantissa = binary.substring(12, 64);
-              this.calculator.exponentDec = parseInt(this.bin2hex(this.calculator.exponent), 16);
+              this.calculator.exponentDec = parseInt(bin2hex(this.calculator.exponent), 16);
               this.calculator.mantissaDec = 0;
 
               var j = 0;
@@ -3013,12 +2885,12 @@ try{
                 return;
               }
 
-              float = this.hex2float("0x" + this.bin2hex(binary));
-              hexadecimal = this.bin2hex(binary);
+              float = this.hex2float("0x" + bin2hex(binary));
+              hexadecimal = bin2hex(binary);
 
               this.calculator.decimal = float;
               this.calculator.hexadecimal = hexadecimal.padStart((this.calculator.bits/4), "0");
-              this.calculator.exponentDec = parseInt(this.bin2hex(this.calculator.exponent), 16);
+              this.calculator.exponentDec = parseInt(bin2hex(this.calculator.exponent), 16);
               this.calculator.mantissaDec = 0;
 
               var j = 0;
@@ -3040,7 +2912,7 @@ try{
 
                 this.calculator.hexadecimal = "";
                 this.calculator.decimal = "";
-                this.calculator.exponentDec = parseInt(this.bin2hex(this.calculator.exponent), 16);
+                this.calculator.exponentDec = parseInt(bin2hex(this.calculator.exponent), 16);
                 this.calculator.mantissaDec = 0;
 
                 var j = 0;
@@ -3051,8 +2923,8 @@ try{
                 return;
               }
 
-              double = this.hex2double("0x" + this.bin2hex(binary));
-              hexadecimal = this.bin2hex(binary);
+              double = hex2double("0x" + bin2hex(binary));
+              hexadecimal = bin2hex(binary);
 
               this.calculator.decimal = double;
               this.calculator.hexadecimal = hexadecimal.padStart((this.calculator.bits/4), "0");
@@ -3065,8 +2937,8 @@ try{
             var hexadecimal;
 
             if(this.calculator.bits == 32){
-              hexadecimal = this.bin2hex(this.float2bin(float));
-              binary = this.float2bin(float);
+              hexadecimal = bin2hex(float2bin(float));
+              binary = float2bin(float);
 
               console_log(hexadecimal);
 
@@ -3074,7 +2946,7 @@ try{
               this.calculator.sign = binary.substring(0, 1);
               this.calculator.exponent = binary.substring(1, 9);
               this.calculator.mantissa = binary.substring(9, 32);
-              this.calculator.exponentDec = parseInt(this.bin2hex(this.calculator.exponent), 16);
+              this.calculator.exponentDec = parseInt(bin2hex(this.calculator.exponent), 16);
               this.calculator.mantissaDec = 0;
 
               var j = 0;
@@ -3085,14 +2957,14 @@ try{
             }
 
             if(this.calculator.bits == 64){
-              hexadecimal = this.bin2hex(this.double2bin(float));
-              binary = this.double2bin(float);
+              hexadecimal = bin2hex(double2bin(float));
+              binary = double2bin(float);
 
               this.calculator.hexadecimal = hexadecimal.padStart((this.calculator.bits/4), "0");
               this.calculator.sign = binary.substring(0, 1);
               this.calculator.exponent = binary.substring(1, 12);
               this.calculator.mantissa = binary.substring(12, 64);
-              this.calculator.exponentDec = parseInt(this.bin2hex(this.calculator.exponent), 16);
+              this.calculator.exponentDec = parseInt(bin2hex(this.calculator.exponent), 16);
               this.calculator.mantissaDec = 0;
 
               var j = 0;
@@ -3140,7 +3012,7 @@ try{
 
             else if(precision == true){
               if(architecture.components[comp].elements[i].name == elem && this.newValue.match(/^0x/)){
-                architecture.components[comp].elements[i].value = this.hex2double(this.newValue);
+                architecture.components[comp].elements[i].value = hex2double(this.newValue);
                 this.updateSimple(comp, i);
               }
               else if(architecture.components[comp].elements[i].name == elem && this.newValue.match(/^(\d)+/)){
@@ -5079,7 +4951,7 @@ try{
       },
       /*Divides a double into two parts*/
       divDouble(reg, index){
-            var value = this.bin2hex(this.double2bin(reg));
+            var value = bin2hex(double2bin(reg));
             console_log(value);
             if(index == 0){
               return "0x" + value.substring(0,8);
@@ -5091,23 +4963,87 @@ try{
 
       /*Reset execution*/
       reset(){
-        $(".loading").show();
+        show_loading();
         setTimeout(function(){
-          // reset engine
-          reset() ;
-
-          // reset UI
           app._data.resetBut = true;
           for (var i = 0; i < instructions.length; i++) {
             instructions[i]._rowVariant = '';
+          }
+          executionIndex = 0;
+          
+          /*Reset stats*/
+          totalStats=0;
+          for (var i = 0; i < stats.length; i++){
+            stats[i].percentage = 0;
+            stats[i].number_instructions = 0;
           }
 
           /*Reset console*/
           app._data.keyboard = "";
           app._data.display = "";
+          mutexRead = false;
           app._data.enter = null;
+          newExecution = true;
 
-          app._data.unallocated_memory = [];
+          for (var i = 0; i < architecture_hash.length; i++) {
+            for (var j = 0; j < architecture.components[i].elements.length; j++) {
+              if(architecture.components[i].double_precision == false){
+                architecture.components[i].elements[j].value = architecture.components[i].elements[j].default_value;
+              }
+
+              else{
+                var aux_value;
+                var aux_sim1;
+                var aux_sim2;
+
+                for (var a = 0; a < architecture_hash.length; a++) {
+                  for (var b = 0; b < architecture.components[a].elements.length; b++) {
+                    if(architecture.components[a].elements[b].name == architecture.components[i].elements[j].simple_reg[0]){
+                      aux_sim1 = bin2hex(float2bin(architecture.components[a].elements[b].default_value));
+                    }
+                    if(architecture.components[a].elements[b].name == architecture.components[i].elements[j].simple_reg[1]){
+                      aux_sim2 = bin2hex(float2bin(architecture.components[a].elements[b].default_value));
+                    }
+                  }
+                }
+
+                aux_value = aux_sim1 + aux_sim2;
+                architecture.components[i].elements[j].value = hex2double("0x" + aux_value);
+              }
+            }
+          }
+
+          architecture.memory_layout[4].value = backup_stack_address;
+          architecture.memory_layout[3].value = backup_data_address;
+
+          for (var i = 0; i < memory[memory_hash[0]].length; i++) {
+            if(memory[memory_hash[0]][i].reset == true){
+              memory[memory_hash[0]].splice(i, 1);
+              i--;
+            }
+            else{
+              memory[memory_hash[0]][i].Value = memory[memory_hash[0]][i].DefValue;
+              for (var j = 0; j < memory[memory_hash[0]][i].Binary.length; j++) {
+                memory[memory_hash[0]][i].Binary[j].Bin = memory[memory_hash[0]][i].Binary[j].DefBin;
+              }
+            }
+          }
+
+          for (var i = 0; i < memory[memory_hash[2]].length; i++) {
+            if(memory[memory_hash[2]][i].reset == true){
+              memory[memory_hash[2]].splice(i, 1);
+              i--;
+            }
+            else{
+              memory[memory_hash[2]][i].Value = memory[memory_hash[2]][i].DefValue;
+              for (var j = 0; j < memory[memory_hash[2]][i].Binary.length; j++) {
+                memory[memory_hash[2]][i].Binary[j].Bin = memory[memory_hash[2]][i].Binary[j].DefBin;
+              }
+            }
+          }
+
+          unallocated_memory = [];
+          app._data.unallocated_memory = unallocated_memory;
 
           for (var i = 0; i < instructions.length; i++) {
             if(instructions[i].Label == "main"){
@@ -5115,8 +5051,8 @@ try{
             }
           }
 
-          $(".loading").hide();
-        }, 10);
+          hide_loading();
+        }, 25);
       },
       /*Enter a breakpoint*/
       breakPoint(record, index){
@@ -5177,21 +5113,6 @@ try{
         new Uint8Array( buffer ).set( value_bit.match(/.{8}/g).map( binaryStringToInt ) );
         return new DataView( buffer ).getFloat32(0, false);
       },
-      /*Convert hexadecimal number to double floating point number*/
-      hex2double ( hexvalue ){
-        var value = hexvalue.split('x');
-        var value_bit = '';
-
-        for (var i = 0; i < value[1].length; i++){
-          var aux = value[1].charAt(i);
-          aux = (parseInt(aux, 16)).toString(2).padStart(4, "0");
-          value_bit = value_bit + aux;
-        }
-
-        var buffer = new ArrayBuffer(8);
-        new Uint8Array( buffer ).set( value_bit.match(/.{8}/g).map(binaryStringToInt ));
-        return new DataView( buffer ).getFloat64(0, false);
-      },
       /*Convert hexadecimal number to char*/
       hex2char8 ( hexvalue ){
         var num_char = ((hexvalue.toString().length))/2;
@@ -5214,96 +5135,46 @@ try{
 
         return  characters;
       },
-      /*Convert floating point number to binary*/
-      float2bin (number){
-        var i, result = "";
-        var dv = new DataView(new ArrayBuffer(4));
 
-        dv.setFloat32(0, number, false);
-
-        for (i = 0; i < 4; i++) {
-            var bits = dv.getUint8(i).toString(2);
-            if (bits.length < 8) {
-              bits = new Array(8 - bits.length).fill('0').join("") + bits;
-            }
-            result += bits;
-        }
-        return result;
+      /*Convert hexadecimal number to char*/
+      bin2hex ( value ){
+         return bin2hex(value) ;
       },
-      /*Convert double floating point number to binary*/
-      double2bin(number) {
-        var i, result = "";
-        var dv = new DataView(new ArrayBuffer(8));
-
-        dv.setFloat64(0, number, false);
-
-        for (i = 0; i < 8; i++) {
-            var bits = dv.getUint8(i).toString(2);
-            if (bits.length < 8) {
-              bits = new Array(8 - bits.length).fill('0').join("") + bits;
-            }
-            result += bits;
-        }
-        return result;
+      hex2double ( value ){
+         return hex2double(value) ;
       },
-      /*Convert binary number to hexadecimal number*/
-      bin2hex(s) {
-        var i, k, part, accum, ret = '';
-        for (i = s.length-1; i >= 3; i -= 4){
-
-          part = s.substr(i+1-4, 4);
-          accum = 0;
-          for (k = 0; k < 4; k += 1){
-            if (part[k] !== '0' && part[k] !== '1'){     
-                return { valid: false };
-            }
-            accum = accum * 2 + parseInt(part[k], 10);
-          }
-          if (accum >= 10){
-            ret = String.fromCharCode(accum - 10 + 'A'.charCodeAt(0)) + ret;
-          } 
-          else {
-            ret = String(accum) + ret;
-          }
-        }
-
-        if (i >= 0){
-          accum = 0;
-          for (k = 0; k <= i; k += 1){
-            if (s[k] !== '0' && s[k] !== '1') {
-                return { valid: false };
-            }
-            accum = accum * 2 + parseInt(s[k], 10);
-          }
-          ret = String(accum) + ret;
-        }
-        return ret;
+      float2bin ( value ){
+         return float2bin(value) ;
       },
+      double2bin ( value ){
+         return double2bin(value) ;
+      },
+
       /*Modifies double precision registers according to simple precision registers*/
       updateDouble(comp, elem){
         for (var j = 0; j < architecture.components.length; j++) {
           for (var z = 0; z < architecture.components[j].elements.length && architecture.components[j].double_precision == true; z++) {
             if(architecture.components[j].elements[z].simple_reg[0] == architecture.components[comp].elements[elem].name){
-              var simple = this.bin2hex(this.float2bin(architecture.components[comp].elements[elem].value));
-              var double = this.bin2hex(this.double2bin(architecture.components[j].elements[z].value)).substr(8, 15);
+              var simple = bin2hex(float2bin(architecture.components[comp].elements[elem].value));
+              var double = bin2hex(double2bin(architecture.components[j].elements[z].value)).substr(8, 15);
               var newDouble = simple + double;
 
-              architecture.components[j].elements[z].value = this.hex2double("0x"+newDouble);
+              architecture.components[j].elements[z].value = hex2double("0x"+newDouble);
             }
             if(architecture.components[j].elements[z].simple_reg[1] == architecture.components[comp].elements[elem].name){
-              var simple = this.bin2hex(this.float2bin(architecture.components[comp].elements[elem].value));
-              var double = this.bin2hex(this.double2bin(architecture.components[j].elements[z].value)).substr(0, 8);
+              var simple = bin2hex(float2bin(architecture.components[comp].elements[elem].value));
+              var double = bin2hex(double2bin(architecture.components[j].elements[z].value)).substr(0, 8);
               var newDouble = double + simple;
 
-              architecture.components[j].elements[z].value = this.hex2double("0x"+newDouble);
+              architecture.components[j].elements[z].value = hex2double("0x"+newDouble);
             }
           }
         }
       },
       /*Modifies single precision registers according to double precision registers*/
       updateSimple(comp, elem){
-        var part1 = this.bin2hex(this.double2bin(architecture.components[comp].elements[elem].value)).substr(0, 8);
-        var part2 = this.bin2hex(this.double2bin(architecture.components[comp].elements[elem].value)).substr(8, 15);
+        var part1 = bin2hex(double2bin(architecture.components[comp].elements[elem].value)).substr(0, 8);
+        var part2 = bin2hex(double2bin(architecture.components[comp].elements[elem].value)).substr(8, 15);
 
         for (var j = 0; j < architecture.components.length; j++) {
           for (var z = 0; z < architecture.components[j].elements.length; z++) {
@@ -5333,37 +5204,24 @@ try{
         this.$root.$emit('bv::hide::popover')
       },
       /*Show integer registers*/
-      /*showIntReg(){
-        app._data.register_type = 'integer';
-        app._data.nameTabReg = "Decimal";
-        app._data.nameReg = 'INT Registers';
-        app._data.data_mode = "registers";
-        app.$forceUpdate();
-      },*/
-      /*Show floating point registers*/
-      /*showFpReg(){
-        app._data.register_type = 'floating point';
-        app._data.nameTabReg = "Real";
-        app._data.nameReg = 'FP Registers';
-        app._data.data_mode = "registers";
-        app.$forceUpdate();
-      },*/
       change_data_view(e, type){
+
         app._data.data_mode = e;
 
-        if(e == "registers"){
-          if(type == "int"){
-            app._data.register_type = 'integer';
+        if (e == "registers")
+	{
+          app._data.register_type = type;
+          if(type == "integer"){
             app._data.nameTabReg = "Decimal";
-            app._data.nameReg = 'INT Registers';
+            app._data.nameReg    = 'INT Registers';
           }
-          else if(type == "fp"){
-            app._data.register_type = 'floating point';
+          else if(type == "floating point"){
             app._data.nameTabReg = "Real";
-            app._data.nameReg = 'FP Registers';
+            app._data.nameReg    = 'FP Registers';
           }
         }
-        if(e == "memory"){
+
+        if (e == "memory"){
           app._data.data_mode = "stats";
           setTimeout(function(){
             app.$forceUpdate();
@@ -5446,61 +5304,9 @@ try{
   function destroyClickedElement(event) {
     document.body.removeChild(event.target);
   }
-  /*console.log*/
-  function console_log(m){
-    if(app._data.c_debug){
-      console.log(m); 
-    }
-  }
 
   /*Architecture editor*/
 
-  /*Bigint number to string*/
-  function bigInt_serialize(object){
-    var auxObject = jQuery.extend(true, {}, object);
-
-    for (var i = 0; i < architecture.components.length; i++){
-      if(architecture.components[i].type != "floating point"){
-        for (var j = 0; j < architecture.components[i].elements.length; j++){
-          var aux = architecture.components[i].elements[j].value;
-          var auxString = aux.toString();
-          auxObject.components[i].elements[j].value = auxString;
-
-          if(architecture.components[i].double_precision != true){
-            var aux = architecture.components[i].elements[j].default_value;
-            var auxString = aux.toString();
-            auxObject.components[i].elements[j].default_value = auxString;
-          }
-        }
-      }
-    }
-    return auxObject;
-  }
-  /*String to Bigint number*/
-  function bigInt_deserialize(object){
-    var auxObject = object;
-
-    for (var i = 0; i < auxObject.components.length; i++){
-      if(auxObject.components[i].type != "floating point"){
-        for (var j = 0; j < auxObject.components[i].elements.length; j++){
-          var aux = auxObject.components[i].elements[j].value;
-          var auxBigInt = bigInt(parseInt(aux) >>> 0, 10).value;
-          auxObject.components[i].elements[j].value = auxBigInt;
-
-          if(auxObject.components[i].double_precision != true){
-            var aux = auxObject.components[i].elements[j].default_value;
-            var auxBigInt = bigInt(parseInt(aux) >>> 0, 10).value;
-            auxObject.components[i].elements[j].default_value = auxBigInt;
-          }
-        }
-      }
-    }
-    return auxObject;
-  }
-
-
-
-  /*Compilator*/
 
   /*Codemirror*/
   function codemirrorStart(){
