@@ -4813,67 +4813,82 @@ function writeRegister(value, indexComp, indexElem){
 
     architecture.components[indexComp].elements[indexElem].value = bigInt(parseInt(value) >>> 0).value;
 
-    var buttonDec = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name  + "Int";
-    var buttonHex = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name;
+    
+    if (!window.document)
+    {
+      var buttonDec = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name  + "Int";
+      var buttonHex = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name;
 
-    /* todo: arriba
+      $(buttonDec).attr("class", "btn btn-outline-secondary btn-block btn-sm modRegister");
+      $(buttonHex).attr("class", "btn btn-outline-secondary btn-block btn-sm modRegister");
 
-    $(buttonDec).attr("class", "btn btn-outline-secondary btn-block btn-sm modRegister");
-    $(buttonHex).attr("class", "btn btn-outline-secondary btn-block btn-sm modRegister");
-
-    setTimeout(function() {
-      $(buttonDec).attr("class", "btn btn-outline-secondary btn-block btn-sm registers");
-      $(buttonHex).attr("class", "btn btn-outline-secondary btn-block btn-sm registers");
-    }, 500);
-    */
+      setTimeout(function() {
+        $(buttonDec).attr("class", "btn btn-outline-secondary btn-block btn-sm registers");
+        $(buttonHex).attr("class", "btn btn-outline-secondary btn-block btn-sm registers");
+      }, 500);
+    }
+    
   }
 
   else if(architecture.components[indexComp].type =="floating point"){
     if(architecture.components[indexComp].double_precision == false){
       if(architecture.components[indexComp].elements[indexElem].properties[0] != "write" && architecture.components[indexComp].elements[indexElem].properties[1] != "write"){
-        show_notification('The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger') ;
-        return;
+        return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger', null);
+        //show_notification('The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger') ;
+        //return;
       }
 
       architecture.components[indexComp].elements[indexElem].value = parseFloat(value);
 
       this.updateDouble(indexComp, indexElem);
 
-      var buttonDec = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name + "FP";
-      var buttonHex = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name;
+      if (!window.document)
+      {
+        var buttonDec = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name + "FP";
+        var buttonHex = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name;
 
-      $(buttonDec).attr("style", "background-color:#c2c2c2;");
-      $(buttonHex).attr("style", "background-color:#c2c2c2;");
+        $(buttonDec).attr("style", "background-color:#c2c2c2;");
+        $(buttonHex).attr("style", "background-color:#c2c2c2;");
 
-      setTimeout(function() {
-        $(buttonDec).attr("style", "background-color:#f5f5f5;");
-        $(buttonHex).attr("style", "background-color:#f5f5f5;");
-      }, 500);
+        setTimeout(function() {
+          $(buttonDec).attr("style", "background-color:#f5f5f5;");
+          $(buttonHex).attr("style", "background-color:#f5f5f5;");
+        }, 500);
+      }
     }
     
     else if(architecture.components[indexComp].double_precision == true){
       if (architecture.components[indexComp].elements[indexElem].properties[0] != "write" && architecture.components[indexComp].elements[indexElem].properties[1] != "write"){
-    show_notification('The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger') ;
-          return;
+          /*show_notification('The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger') ;
+          return;*/
+          return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger', null);
       }
 
       architecture.components[indexComp].elements[indexElem].value = parseFloat(value);
 
       this.updateSimple(indexComp, indexElem);
 
-      var buttonDec = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name + "DFP";
-      var buttonHex = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name;
+      if (!window.document)
+      {
+         var buttonDec = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name + "DFP";
+         var buttonHex = '#popoverValueContent' + architecture.components[indexComp].elements[indexElem].name;
 
-      $(buttonDec).attr("style", "background-color:#c2c2c2;");
-      $(buttonHex).attr("style", "background-color:#c2c2c2;");
+         $(buttonDec).attr("style", "background-color:#c2c2c2;");
+         $(buttonHex).attr("style", "background-color:#c2c2c2;");
 
-      setTimeout(function() {
-        $(buttonDec).attr("style", "background-color:#f5f5f5;");
-        $(buttonHex).attr("style", "background-color:#f5f5f5;");
-      }, 500);
+         setTimeout(function() {
+           $(buttonDec).attr("style", "background-color:#f5f5f5;");
+           $(buttonHex).attr("style", "background-color:#f5f5f5;");
+         }, 500);
+      } // if
+
     }
   }  
 }
+
+
+
+
 /*Read memory value*/
 function readMemory(addr, type){
   var memValue = '';
@@ -4881,10 +4896,11 @@ function readMemory(addr, type){
 
   if (type == "w"){
     if((parseInt(addr, 16) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr, 16) == architecture.memory_layout[0].value || parseInt(addr, 16) == architecture.memory_layout[1].value){
-      show_notification('Segmentation fault. You tried to read in the text segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to read in the text segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
       executionIndex = -1;
-      return;
+      //return;
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
     }
 
     if((parseInt(addr, 16) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr, 16) == architecture.memory_layout[2].value || parseInt(addr, 16) == architecture.memory_layout[3].value){
@@ -4913,10 +4929,11 @@ function readMemory(addr, type){
 
   if (type == "h"){
     if((parseInt(addr, 16) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr, 16) == architecture.memory_layout[0].value || parseInt(addr, 16) == architecture.memory_layout[1].value){
-      show_notification('Segmentation fault. You tried to read in the text segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to read in the text segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
       executionIndex = -1;
-      return;
+      //return;
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
     }
 
     if((parseInt(addr, 16) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr, 16) == architecture.memory_layout[2].value || parseInt(addr, 16) == architecture.memory_layout[3].value){
@@ -4954,10 +4971,11 @@ function readMemory(addr, type){
 
   if (type == "b"){
     if((parseInt(addr, 16) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr, 16) == architecture.memory_layout[0].value || parseInt(addr, 16) == architecture.memory_layout[1].value){
-      show_notification('Segmentation fault. You tried to read in the text segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to read in the text segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
       executionIndex = -1;
-      return;
+      //return;
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
     }
 
     if((parseInt(addr, 16) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr, 16) == architecture.memory_layout[2].value || parseInt(addr, 16) == architecture.memory_layout[3].value){
@@ -4994,10 +5012,11 @@ function writeMemory(value, addr, type){
 
   if (type == "w"){
     if((parseInt(addr, 16) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr, 16) == architecture.memory_layout[0].value || parseInt(addr, 16) == architecture.memory_layout[1].value){
-      show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
       executionIndex = -1;
-      return;
+      //return;
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
     }
 
     if((parseInt(addr, 16) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr, 16) == architecture.memory_layout[2].value || parseInt(addr, 16) == architecture.memory_layout[3].value){
@@ -5065,10 +5084,11 @@ function writeMemory(value, addr, type){
 
   if (type == "h"){
     if((parseInt(addr, 16) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr, 16) == architecture.memory_layout[0].value || parseInt(addr, 16) == architecture.memory_layout[1].value){
-      show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
       executionIndex = -1;
-      return;
+      //return;
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
     }
 
     if((parseInt(addr, 16) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr, 16) == architecture.memory_layout[2].value || parseInt(addr, 16) == architecture.memory_layout[3].value){
@@ -5219,10 +5239,11 @@ function writeMemory(value, addr, type){
 
   if (type == "b"){
     if((parseInt(addr, 16) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr, 16) == architecture.memory_layout[0].value || parseInt(addr, 16) == architecture.memory_layout[1].value){
-      show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
       executionIndex = -1;
-      return;
+      //return;
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
     }
 
     if((parseInt(addr, 16) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr, 16) == architecture.memory_layout[2].value || parseInt(addr, 16) == architecture.memory_layout[3].value){
@@ -5317,16 +5338,18 @@ function writeMemory(value, addr, type){
 function writeStackLimit(stackLimit){
   if(stackLimit != null){
     if(stackLimit <= architecture.memory_layout[3].value && stackLimit >= architecture.memory_layout[2].value){
-      show_notification('Segmentation fault. You tried to write in the data segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to write in the data segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
       executionIndex = -1;
-      return;
+      //return;
     }
     else if(stackLimit <= architecture.memory_layout[1].value && stackLimit >= architecture.memory_layout[0].value){
-      show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
-      instructions[executionIndex]._rowVariant = 'danger';
+      /*show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
+      instructions[executionIndex]._rowVariant = 'danger';*/
       executionIndex = -1;
-      return;
+      //return;
+      return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
     }
     else{
       if(stackLimit < architecture.memory_layout[4].value){
@@ -5386,11 +5409,12 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
       var index;
 
       if((parseInt(addr) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr) == architecture.memory_layout[0].value || parseInt(addr) == architecture.memory_layout[1].value){
-        show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
-        instructions[executionIndex]._rowVariant = 'danger';
+        /*show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
+        instructions[executionIndex]._rowVariant = 'danger';*/
         executionIndex = -1;
         this.keyboard = "";
-        return;
+        return packExecute(true, 'Segmentation fault. You tried to read in the text segment', 'danger', null);
+        //return;
       }
 
       if((parseInt(addr) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr) == architecture.memory_layout[2].value || parseInt(addr) == architecture.memory_layout[3].value){
@@ -5435,13 +5459,14 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        //show_notification('The data has been uploaded', 'info') ;
 
         if(runExecution == false){
           this.executeProgram();
         }
 
-        return;
+        //return;
+        return packExecute(true, 'The data has been uploaded', 'info', null);
       }
 
       if(consoleMutex == false){
@@ -5456,7 +5481,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if (window.document)
+            show_notification('The data has been uploaded', 'info') ;
 
         if(executionIndex >= instructions.length){
           for (var i = 0; i < instructions.length; i++){
@@ -5464,8 +5490,9 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
           }
 
           executionIndex = -2;
-          show_notification('The execution of the program has finished', 'success') ;
-          return;
+          /*show_notification('The execution of the program has finished', 'success') ;
+          return;*/
+          return packExecute(true, 'The execution of the program has finished', 'success', null);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5484,7 +5511,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if (window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         if(runExecution == false){
           this.executeProgram();
@@ -5505,7 +5533,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if (window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         if(executionIndex >= instructions.length){
           for (var i = 0; i < instructions.length; i++) {
@@ -5513,8 +5542,10 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
           }
 
           executionIndex = -2;
-          show_notification('The execution of the program has finished', 'success') ;
-          return;
+          /*show_notification('The execution of the program has finished', 'success') ;
+          return;*/
+
+          return packExecute(true, 'The execution of the program has finished', 'success', null);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5533,8 +5564,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         consoleMutex = false;
         mutexRead = false;
         app._data.enter = null;
-
-        show_notification('The data has been uploaded', 'info') ;
+        if(window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         if(runExecution == false){
           this.executeProgram();
@@ -5555,7 +5586,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if(window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         if(executionIndex >= instructions.length){
           for (var i = 0; i < instructions.length; i++) {
@@ -5563,8 +5595,9 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
           }
 
           executionIndex = -2;
-          show_notification('The execution of the program has finished', 'success') ;
-          return;
+          /*show_notification('The execution of the program has finished', 'success') ;
+          return;*/
+          return packExecute(true, 'The execution of the program has finished', 'success', null);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5584,7 +5617,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if(window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         if(runExecution == false){
           this.executeProgram();
@@ -5611,11 +5645,12 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         var index;
 
         if((parseInt(addr) > architecture.memory_layout[0].value && parseInt(addr) < architecture.memory_layout[1].value) ||  parseInt(addr) == architecture.memory_layout[0].value || parseInt(addr) == architecture.memory_layout[1].value){
-          show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
-          instructions[executionIndex-1]._rowVariant = 'danger';
+          /*show_notification('Segmentation fault. You tried to write in the text segment', 'danger') ;
+          instructions[executionIndex-1]._rowVariant = 'danger';*/
           executionIndex = -1;
           this.keyboard = "";
-          return;
+          //return;
+          return packExecute(true, 'Segmentation fault. You tried to write in the text segment', 'danger', null);
         }
 
         if((parseInt(addr) > architecture.memory_layout[2].value && parseInt(addr) < architecture.memory_layout[3].value) ||  parseInt(addr) == architecture.memory_layout[2].value || parseInt(addr) == architecture.memory_layout[3].value){
@@ -5688,7 +5723,9 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
           mutexRead = false;
           app._data.enter = null;
 
-          show_notification('The data has been uploaded', 'info') ;
+          if(window.document)
+            show_notification('The data has been uploaded', 'info');
+
 
           if(executionIndex >= instructions.length){
             for (var i = 0; i < instructions.length; i++) {
@@ -5696,8 +5733,9 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
             }
 
             executionIndex = -2;
-            show_notification('The execution of the program has finished', 'success') ;
-            return;
+            /*show_notification('The execution of the program has finished', 'success') ;
+            return;*/
+            return packExecute(true, 'The execution of the program has finished', 'success', null);
           }
           else if(runExecution == false){
             this.executeProgram();
@@ -5731,7 +5769,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if(window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         if(executionIndex >= instructions.length){
           for (var i = 0; i < instructions.length; i++) {
@@ -5739,8 +5778,9 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
           }
 
           executionIndex = -2;
-          show_notification('The execution of the program has finished', 'success') ;
-          return;
+          /*show_notification('The execution of the program has finished', 'success') ;
+          return;*/
+          return packExecute(true, 'The execution of the program has finished', 'success', null);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5754,10 +5794,11 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
       var aux_addr = architecture.memory_layout[3].value;
 
       if((architecture.memory_layout[3].value+parseInt(architecture.components[indexComp].elements[indexElem].value)) >= architecture.memory_layout[4].value){
-        show_notification('Not enough memory for data segment', 'danger') ;
-        instructions[executionIndex]._rowVariant = 'danger';
+        /*show_notification('Not enough memory for data segment', 'danger') ;
+        instructions[executionIndex]._rowVariant = 'danger';*/
         executionIndex = -1;
-        return;
+        //return;
+        return packExecute(true, 'Not enough memory for data segment', 'success', null);
       }
 
       for (var i = 0; i < ((parseInt(architecture.components[indexComp].elements[indexElem].value))/4); i++){
@@ -5794,7 +5835,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if(window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         if(runExecution == false){
           this.executeProgram();
@@ -5813,7 +5855,8 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         mutexRead = false;
         app._data.enter = null;
 
-        show_notification('The data has been uploaded', 'info') ;
+        if(window.document)
+          show_notification('The data has been uploaded', 'info') ;
 
         console_log(mutexRead);
 
@@ -5823,8 +5866,9 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
           }
 
           executionIndex = -2;
-          show_notification('The execution of the program has finished', 'success') ;
-          return;
+          /*show_notification('The execution of the program has finished', 'success') ;
+          return;*/
+          return packExecute(true, 'The execution of the program has finished', 'success', null);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5936,7 +5980,8 @@ function reset (){
 
   for (var i = 0; i < instructions.length; i++) {
     if(instructions[i].Label == "main"){
-      instructions[i]._rowVariant = 'success';
+      if(window.document)
+        instructions[i]._rowVariant = 'success';
     }
   }
 }
