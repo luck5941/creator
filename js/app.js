@@ -3038,22 +3038,27 @@ try{
       /*Execute one instruction*/
       executeInstruction(){
          var ret = executeInstruction();
+         console.log(ret);
+
+         if(typeof ret === "undefined"){
+          console.log("AQUI")
+         }
 
          if (ret.msg != null) {
              show_notification(ret.msg, ret.type);
-             return ;
+             //return ;
          }
 
          if (ret.draw != null) {
             // console.log(JSON.stringify(ret,2,null));
-             for (var i=0; i<ret.draw.space.length; i++) {
-                  instructions[ret.draw.space[i]]._rowVariant = '';
+             for (var i=0; i<ret.draw.success.length; i++) {
+                  instructions[ret.draw.success[i]]._rowVariant = 'success';
              }
              for (var i=0; i<ret.draw.info.length; i++) {
                   instructions[ret.draw.info[i]]._rowVariant = 'info';
              }
-             for (var i=0; i<ret.draw.success.length; i++) {
-                  instructions[ret.draw.success[i]]._rowVariant = 'success';
+             for (var i=0; i<ret.draw.space.length; i++) {
+                  instructions[ret.draw.space[i]]._rowVariant = '';
              }
              for (var i=0; i<ret.draw.danger.length; i++) {
                   instructions[ret.draw.danger[i]]._rowVariant = 'danger';
@@ -3120,7 +3125,8 @@ try{
             return;
           }
           else{
-            executeInstruction();
+//            executeInstruction();
+              app.executeInstruction();
             iter1 = 0;
           }
         }

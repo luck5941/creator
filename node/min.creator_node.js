@@ -4515,7 +4515,10 @@ function executeInstruction(){
 
             auxDef = auxDef.replace(re, "reg"+ regIndex+"=");
             auxDef = "var reg" + regIndex + "=null;\n" + auxDef;
-            auxDef = auxDef + "\n writeRegister(reg"+regIndex+","+i+" ,"+j+");"
+            auxDef = auxDef + "\n var ret = writeRegister(reg"+regIndex+","+i+" ,"+j+");" +
+                              "if (ret.error) {\n" +
+                              "    return ret;" +
+                              "}\n";
             regIndex++;
           }
 
@@ -4525,7 +4528,10 @@ function executeInstruction(){
               re = new RegExp("R"+regNum+" *=","g");
               auxDef = auxDef.replace(re, "var reg"+ regIndex+"=");
               auxDef = "var reg" + regIndex + "=null\n" + auxDef;
-              auxDef = auxDef + "\n writeRegister(reg"+regIndex+","+i+" ,"+j+");"
+              auxDef = auxDef + "\n var ret = writeRegister(reg"+regIndex+","+i+" ,"+j+");" +
+                                "if (ret.error) {\n" +
+                                "    return ret;" +
+                                "}\n";
               regIndex++;
             }
           }
@@ -4535,7 +4541,7 @@ function executeInstruction(){
           while(auxDef.search(re) != -1){
             var match = re.exec(auxDef);
             auxDef = auxDef.replace(re, 
-                                    match[1] + "readRegister("+i+" ,"+j+")");
+            match[1] + "readRegister("+i+" ,"+j+")");
           }
 
           if(architecture.components[i].type == "integer"){
@@ -4639,7 +4645,10 @@ function executeInstruction(){
     }
 
     try{
-      instructions[executionIndex].preload(this);
+      var result = instructions[executionIndex].preload(this);
+      if(result.error){
+        return result;
+      }
       //eval(auxDef);
     }
     catch(e){
@@ -4707,7 +4716,7 @@ function executeInstruction(){
       }
 
       executionIndex = -2;
-      return packExecute(false, 'The execution of the program has finished', 'success', null);
+      return packExecute(false, 'The execution of the program has finished', 'success', draw);
       /*show_notification('The execution of the program has finished', 'success') ;
       return;*/
     }
@@ -4781,8 +4790,21 @@ function readRegister(indexComp, indexElem){
   if(architecture.components[indexComp].elements[indexElem].properties[0] != "read" && architecture.components[indexComp].elements[indexElem].properties[1] != "read"){
     /*show_notification('The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be read', 'danger') ;
     instructions[executionIndex]._rowVariant = 'danger';*/
+    var draw = {
+        space: [] ,
+        info: [] ,
+        success: [] ,
+        danger: [],
+        flash: []
+      } ;
+    for (var i = 0; i < instructions.length; i++) {
+      draw.space.push(i);
+    }
+    
+    draw.danger.push(executionIndex);
+
     executionIndex = -1;
-    return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be read', 'danger', null);
+    return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be read', 'danger', draw);
     
     //return;
   }
@@ -4806,8 +4828,22 @@ function writeRegister(value, indexComp, indexElem){
     if(architecture.components[indexComp].elements[indexElem].properties[0] != "write" && architecture.components[indexComp].elements[indexElem].properties[1] != "write"){
       /*show_notification('The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger') ;
       instructions[executionIndex]._rowVariant = 'danger';*/
+
+      var draw = {
+          space: [] ,
+          info: [] ,
+          success: [] ,
+          danger: [],
+          flash: []
+        } ;
+      for (var i = 0; i < instructions.length; i++) {
+        draw.space.push(i);
+      }
+
+      draw.danger.push(executionIndex);
+
       executionIndex = -1;
-      return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger', null);
+      return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger', draw);
       //return;
     }
 
@@ -5485,14 +5521,16 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
             show_notification('The data has been uploaded', 'info') ;
 
         if(executionIndex >= instructions.length){
-          for (var i = 0; i < instructions.length; i++){
-            instructions[i]._rowVariant = '';
+          for (var i = 0; i < instructions.length; i++) {
+            //instructions[i]._rowVariant = '';
+            draw.space.push(i);
           }
 
           executionIndex = -2;
           /*show_notification('The execution of the program has finished', 'success') ;
           return;*/
-          return packExecute(true, 'The execution of the program has finished', 'success', null);
+
+          return packExecute(true, 'The execution of the program has finished', 'success', draw);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5538,14 +5576,15 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
 
         if(executionIndex >= instructions.length){
           for (var i = 0; i < instructions.length; i++) {
-            instructions[i]._rowVariant = '';
+            //instructions[i]._rowVariant = '';
+            draw.space.push(i);
           }
 
           executionIndex = -2;
           /*show_notification('The execution of the program has finished', 'success') ;
           return;*/
 
-          return packExecute(true, 'The execution of the program has finished', 'success', null);
+          return packExecute(true, 'The execution of the program has finished', 'success', draw);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5591,13 +5630,15 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
 
         if(executionIndex >= instructions.length){
           for (var i = 0; i < instructions.length; i++) {
-            instructions[i]._rowVariant = '';
+            //instructions[i]._rowVariant = '';
+            draw.space.push(i);
           }
 
           executionIndex = -2;
           /*show_notification('The execution of the program has finished', 'success') ;
           return;*/
-          return packExecute(true, 'The execution of the program has finished', 'success', null);
+
+          return packExecute(true, 'The execution of the program has finished', 'success', draw);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5729,13 +5770,15 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
 
           if(executionIndex >= instructions.length){
             for (var i = 0; i < instructions.length; i++) {
-              instructions[i]._rowVariant = '';
+              //instructions[i]._rowVariant = '';
+              draw.space.push(i);
             }
 
             executionIndex = -2;
             /*show_notification('The execution of the program has finished', 'success') ;
             return;*/
-            return packExecute(true, 'The execution of the program has finished', 'success', null);
+
+            return packExecute(true, 'The execution of the program has finished', 'success', draw);
           }
           else if(runExecution == false){
             this.executeProgram();
@@ -5774,13 +5817,15 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
 
         if(executionIndex >= instructions.length){
           for (var i = 0; i < instructions.length; i++) {
-            instructions[i]._rowVariant = '';
+            //instructions[i]._rowVariant = '';
+            draw.space.push(i);
           }
 
           executionIndex = -2;
           /*show_notification('The execution of the program has finished', 'success') ;
           return;*/
-          return packExecute(true, 'The execution of the program has finished', 'success', null);
+
+          return packExecute(true, 'The execution of the program has finished', 'success', draw);
         }
         else if(runExecution == false){
           this.executeProgram();
@@ -5861,14 +5906,16 @@ function syscall(action, indexComp, indexElem, indexComp2, indexElem2){
         console_log(mutexRead);
 
         if(executionIndex >= instructions.length){
-          for (var i = 0; i < instructions.length; i++){
-            instructions[i]._rowVariant = '';
+          for (var i = 0; i < instructions.length; i++) {
+            //instructions[i]._rowVariant = '';
+            draw.space.push(i);
           }
 
           executionIndex = -2;
           /*show_notification('The execution of the program has finished', 'success') ;
           return;*/
-          return packExecute(true, 'The execution of the program has finished', 'success', null);
+
+          return packExecute(true, 'The execution of the program has finished', 'success', draw);
         }
         else if(runExecution == false){
           this.executeProgram();
