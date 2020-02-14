@@ -632,10 +632,10 @@ function executeInstruction(){
 
             auxDef = auxDef.replace(re, "reg"+ regIndex+"=");
             auxDef = "var reg" + regIndex + "=null;\n" + auxDef;
-            auxDef = auxDef + "\n var ret = writeRegister(reg"+regIndex+","+i+" ,"+j+");" +
-                              "if (ret.error) {\n" +
-                              "    return ret;" +
-                              "}\n";
+            auxDef = auxDef.replace(re, "reg"+ regIndex+"=");
+                  auxDef = "var reg" + regIndex + "=null;\n" + auxDef;
+                  auxDef = auxDef + "\n this.writeRegister(reg"+regIndex+","+i+" ,"+j+");"
+                  regIndex++;
             regIndex++;
           }
 
@@ -643,12 +643,10 @@ function executeInstruction(){
             re = new RegExp("R"+regNum+" *=[^=]");
             if (auxDef.search(re) != -1){
               re = new RegExp("R"+regNum+" *=","g");
-              auxDef = auxDef.replace(re, "var reg"+ regIndex+"=");
-              auxDef = "var reg" + regIndex + "=null\n" + auxDef;
-              auxDef = auxDef + "\n var ret = writeRegister(reg"+regIndex+","+i+" ,"+j+");" +
-                                "if (ret.error) {\n" +
-                                "    return ret;" +
-                                "}\n";
+                    auxDef = auxDef.replace(re, "var reg"+ regIndex+"=");
+                    auxDef = "var reg" + regIndex + "=null\n" + auxDef;
+                    auxDef = auxDef + "\n this.writeRegister(reg"+regIndex+","+i+" ,"+j+");"
+                    regIndex++;
               regIndex++;
             }
           }
@@ -665,14 +663,10 @@ function executeInstruction(){
             re = new RegExp("R"+regNum+"[^0-9]|[\\s]","g");
             if(auxDef.search(re) != -1){
               re = new RegExp("R"+regNum,"g");
-              auxDef = auxDef.replace(re, 
-                                      "var ret = readRegister("+i+" ,"+j+");" +
-                                      "if (ret.error) {\n" + 
-                                      "    ret.draw.danger.push(executionIndex);" +
-                                      "    return ret;" +
-                                      "}\n");
+              auxDef = auxDef.replace(re, "readRegister("+i+" ,"+j+")");
             }
           }
+	        
 
           if(architecture.components[i].type == "integer"){
             regNum--;
@@ -758,7 +752,15 @@ function executeInstruction(){
       console_log(auxDef);
 
       // preload instruction
-      eval("instructions[" + executionIndex + "].preload = function(elto) { " + auxDef.replace(/this./g,"elto.") + " }; ") ;
+
+			eval("instructions[" + executionIndex + "].preload = function(elto) { " + 
+      	"try {\n" +
+      	auxDef.replace(/this./g,"elto.") + "\n" +
+      	"}\n" +
+      	"catch(e){\n" +
+      	"return e;\n" +
+      	"}\n" +
+      	" }; ") ;        
     }
 
     try{
@@ -868,42 +870,9 @@ function executeProgramOneShot(){
   console.log('"ERROR:" Infinite loop');
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*todo: indice danger read write*/
-/*todo:
-   ret = readRegister(...);
-   if (ret.error) {
-       ret.draw.danger.push(!!!!!!"executionIndex"¡!!!!1) ;
-       return ret ;
-       }
-*/
-
-
-
-
-
-
-
 /*Read register value*/
 function readRegister(indexComp, indexElem){
+
   if(architecture.components[indexComp].elements[indexElem].properties[0] != "read" && architecture.components[indexComp].elements[indexElem].properties[1] != "read"){
     /*show_notification('The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be read', 'danger') ;
     instructions[executionIndex]._rowVariant = 'danger';*/
@@ -921,17 +890,17 @@ function readRegister(indexComp, indexElem){
     draw.danger.push(executionIndex);
 
     executionIndex = -1;
-    return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be read', 'danger', draw);
-    
-    //return;
+  //return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be read', 'danger', draw);
+    throw packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be read', 'danger', draw);    
+    //return
   }
 
   if(architecture.components[indexComp].type == "control" || architecture.components[indexComp].type == "integer"){
     console_log(parseInt((architecture.components[indexComp].elements[indexElem].value).toString()));
-    return parseInt((architecture.components[indexComp].elements[indexElem].value).toString());
+    return  parseInt((architecture.components[indexComp].elements[indexElem].value).toString());
   }
   if(architecture.components[indexComp].type == "floating point"){
-    return parseFloat((architecture.components[indexComp].elements[indexElem].value).toString());
+    return  parseFloat((architecture.components[indexComp].elements[indexElem].value).toString());
   }
   
 }
@@ -960,7 +929,7 @@ function writeRegister(value, indexComp, indexElem){
       draw.danger.push(executionIndex);
 
       executionIndex = -1;
-      return packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger', draw);
+      throw packExecute(true, 'The register '+ architecture.components[indexComp].elements[indexElem].name +' cannot be written', 'danger', draw);
       //return;
     }
 
