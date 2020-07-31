@@ -1,10 +1,10 @@
 :root {
-    --fontSize: 15px;
+    --fontSize: 100%;
 }
 body{
   background-color: #FFFFFF;
   overflow-x: hidden;
-  font-size: 15px
+  font-size: var(--fontSize);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

@@ -469,6 +469,7 @@ try
       this.backupCopyModal();
       this.verifyNavigator();
       this.get_configuration();
+      this.get_font_size();
 
       // pre-load following URL params
       var url_hash = creator_preload_get2hash(window.location) ;
@@ -477,7 +478,6 @@ try
 
     beforeUpdate(){
       this.get_dark_mode();
-      this.get_font_size();
     },
 
     /*Vue methods*/
@@ -529,6 +529,7 @@ try
           this.notificationTime = parseInt(localStorage.getItem("notificationTime"));
 
         }
+        //this.get_font_size();
       },
 
       /*Verify if dark mode was activated de last use*/
@@ -559,7 +560,8 @@ try
         if ((fontSize = localStorage.getItem("fontSize")) === null) 
           this.fontSize = 15;
         else this.fontSize = parseInt(fontSize);
-        document.documentElement.style.setProperty("--fontSize", this.fontSize+"px");
+        let fs = this.fontSize*300/48+8
+        document.documentElement.style.setProperty("--fontSize", fs+"%");
         
       },
 
@@ -609,7 +611,7 @@ try
       /*change the font size*/
       change_font_size(value){
         if (value) {
-           this.fontSize= this.fontSize + value;
+           this.fontSize= this.fontSize + value*5;
            if (this.fontSize < 8){
                this.fontSize = 8;
            }
@@ -622,7 +624,8 @@ try
          }
 
          //document.getElementsByTagName("body")[0].style.fontSize = this.fontSize + "px";
-          document.documentElement.style.setProperty("--fontSize", this.fontSize+"px");
+         let fs = this.fontSize*300/48+8;
+          document.documentElement.style.setProperty("--fontSize", fs+"%");
         localStorage.setItem("fontSize", this.fontSize);
       },
 
