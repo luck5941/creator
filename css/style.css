@@ -1,3 +1,6 @@
+:root {
+    --fontSize: 15px;
+}
 body{
   background-color: #FFFFFF;
   overflow-x: hidden;
@@ -285,6 +288,7 @@ h2 {
   border: 1px solid #eee;
   height: auto;
   font-size: 0.85em;
+  font-size:var(--fontSize);
 }
 
 .code-scroll-y {

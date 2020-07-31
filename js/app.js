@@ -612,8 +612,9 @@ try
             this.fontSize = parseInt(this.fontSize);
          }
 
-         document.getElementsByTagName("body")[0].style.fontSize = this.fontSize + "px";
-         //localStorage.setItem("fontSize", this.fontSize);
+         //document.getElementsByTagName("body")[0].style.fontSize = this.fontSize + "px";
+          document.documentElement.style.setProperty("--fontSize", this.fontSize+"px");
+        localStorage.setItem("fontSize", this.fontSize);
       },
 
       /*Dark  Mode*/
