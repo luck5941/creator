@@ -477,6 +477,7 @@ try
 
     beforeUpdate(){
       this.get_dark_mode();
+      this.get_font_size();
     },
 
     /*Vue methods*/
@@ -552,6 +553,14 @@ try
           	app._data.dark = false;
         	}
         }
+      },
+      get_font_size() {
+	let fontSize;
+        if ((fontSize = localStorage.getItem("fontSize")) === null) 
+          this.fontSize = 15;
+        else this.fontSize = parseInt(fontSize);
+        document.documentElement.style.setProperty("--fontSize", this.fontSize+"px");
+        
       },
 
       /*Change the execution speed*/
